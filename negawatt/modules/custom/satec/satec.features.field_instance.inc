@@ -201,8 +201,8 @@ function satec_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-satec_meter-field_meter_category'
-  $field_instances['node-satec_meter-field_meter_category'] = array(
+  // Exported field_instance: 'node-satec_meter-field_site_category'
+  $field_instances['node-satec_meter-field_site_category'] = array(
     'bundle' => 'satec_meter',
     'default_value' => NULL,
     'deleted' => 0,
@@ -225,8 +225,8 @@ function satec_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_meter_category',
-    'label' => 'Meter Category',
+    'field_name' => 'field_site_category',
+    'label' => 'Site Category',
     'required' => 0,
     'settings' => array(
       'behaviors' => array(
@@ -555,7 +555,7 @@ function satec_field_default_field_instances() {
   t('Last processed');
   t('Location');
   t('MAC address');
-  t('Meter Category');
+  t('Site Category');
   t('Meter IP address');
   t('Meter id');
   t('Meter port');

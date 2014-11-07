@@ -205,8 +205,8 @@ function iec_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-iec_meter-field_meter_category'
-  $field_instances['node-iec_meter-field_meter_category'] = array(
+  // Exported field_instance: 'node-iec_meter-field_site_category'
+  $field_instances['node-iec_meter-field_site_category'] = array(
     'bundle' => 'iec_meter',
     'default_value' => NULL,
     'deleted' => 0,
@@ -229,8 +229,8 @@ function iec_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_meter_category',
-    'label' => 'Meter Category',
+    'field_name' => 'field_site_category',
+    'label' => 'Site Category',
     'required' => 0,
     'settings' => array(
       'behaviors' => array(
@@ -575,7 +575,7 @@ function iec_field_default_field_instances() {
   t('In case we have 2 or more meters for a single contract, this field will reference to the \'main\' contract ID, which is used to save the electricity Data.');
   t('Last processed');
   t('Location');
-  t('Meter Category');
+  t('Site Category');
   t('Meter Code');
   t('Meter Serial');
   t('Parent contract');

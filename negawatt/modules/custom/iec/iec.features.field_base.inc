@@ -72,13 +72,13 @@ function iec_field_default_field_bases() {
     'type' => 'datestamp',
   );
 
-  // Exported field_base: 'field_meter_category'
-  $field_bases['field_meter_category'] = array(
+  // Exported field_base: 'field_site_category'
+  $field_bases['field_site_category'] = array(
     'active' => 1,
     'cardinality' => -1,
     'deleted' => 0,
     'entity_types' => array(),
-    'field_name' => 'field_meter_category',
+    'field_name' => 'field_site_category',
     'foreign keys' => array(
       'taxonomy_term_data' => array(
         'columns' => array(
@@ -106,7 +106,7 @@ function iec_field_default_field_bases() {
           'type' => 'none',
         ),
         'target_bundles' => array(
-          'meter_category' => 'meter_category',
+          'site_category' => 'site_category',
         ),
       ),
       'target_type' => 'taxonomy_term',

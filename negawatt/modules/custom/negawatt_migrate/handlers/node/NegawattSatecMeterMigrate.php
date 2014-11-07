@@ -22,12 +22,12 @@ class NegawattSatecMeterMigrate extends NegawattMigration {
     array('field_meter_id', 'Meter id'),
     array('country', 'Country'),
     array('field_last_processed', 'Last processed'),
-    array('field_meter_category', 'Meter category'),
+    array('field_site_category', 'Site category'),
   );
 
   public $dependencies = array(
     'NegawattAccountMigrate',
-    'NegawattMeterCategoryTermsMigrate',
+    'NegawattSiteCategoryTermsMigrate',
   );
 
   public function __construct() {
@@ -59,8 +59,8 @@ class NegawattSatecMeterMigrate extends NegawattMigration {
       ->defaultValue('1');
 
     $this
-      ->addFieldMapping('field_meter_category', 'field_meter_category')
-      ->sourceMigration('NegawattMeterCategoryTermsMigrate')
+      ->addFieldMapping('field_site_category', 'field_site_category')
+      ->sourceMigration('NegawattSiteCategoryTermsMigrate')
       ->separator('|');
   }
 

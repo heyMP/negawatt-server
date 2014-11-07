@@ -9,10 +9,10 @@
  * Migrate Meter-category taxonomy terms.
  */
 
-class NegawattMeterCategoryTermsMigrate extends Migration {
+class NegawattSiteCategoryTermsMigrate extends Migration {
 
   public $entityType = 'taxonomy_term';
-  public $bundle = 'meter_category';
+  public $bundle = 'site_category';
 
   protected $csvColumns = array(
     array('id', 'Unique ID'),
