@@ -49,6 +49,16 @@ class NegawattIecMeterResource extends \NegawattEntityBaseNode {
       ),
     );
 
+    $public_fields['site_category'] = array(
+      'property' => 'field_site_category',
+//      'resource' => array(
+//        'category' => array(
+//          'name' => 'names',
+//          'full_view' => FALSE,
+//        ),
+//      ),
+    );
+
     return $public_fields;
   }
 
