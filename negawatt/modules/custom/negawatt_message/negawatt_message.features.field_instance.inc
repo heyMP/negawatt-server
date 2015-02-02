@@ -10,6 +10,43 @@
 function negawatt_message_field_default_field_instances() {
   $field_instances = array();
 
+  // Exported field_instance: 'message-anomalous_consumption-field_account'
+  $field_instances['message-anomalous_consumption-field_account'] = array(
+    'bundle' => 'anomalous_consumption',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'entityreference',
+        'settings' => array(
+          'link' => 1,
+        ),
+        'type' => 'entityreference_label',
+        'weight' => 2,
+      ),
+    ),
+    'entity_type' => 'message',
+    'field_name' => 'field_account',
+    'label' => 'Account',
+    'required' => 1,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'entityreference',
+      'settings' => array(
+        'match_operator' => 'CONTAINS',
+        'path' => '',
+        'size' => 60,
+      ),
+      'type' => 'entityreference_autocomplete',
+      'weight' => 1,
+    ),
+  );
+
   // Exported field_instance: 'message-anomalous_consumption-field_meter'
   $field_instances['message-anomalous_consumption-field_meter'] = array(
     'bundle' => 'anomalous_consumption',
@@ -21,7 +58,7 @@ function negawatt_message_field_default_field_instances() {
         'label' => 'above',
         'module' => 'entityreference',
         'settings' => array(
-          'link' => FALSE,
+          'link' => 1,
         ),
         'type' => 'entityreference_label',
         'weight' => 1,
@@ -43,6 +80,43 @@ function negawatt_message_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'message-normalization_completed-field_account'
+  $field_instances['message-normalization_completed-field_account'] = array(
+    'bundle' => 'normalization_completed',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'entityreference',
+        'settings' => array(
+          'link' => 1,
+        ),
+        'type' => 'entityreference_label',
+        'weight' => 1,
+      ),
+    ),
+    'entity_type' => 'message',
+    'field_name' => 'field_account',
+    'label' => 'Account',
+    'required' => 1,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'entityreference',
+      'settings' => array(
+        'match_operator' => 'CONTAINS',
+        'path' => '',
+        'size' => 60,
+      ),
+      'type' => 'entityreference_autocomplete',
+      'weight' => 3,
+    ),
+  );
+
   // Exported field_instance: 'message-normalization_completed-field_meter'
   $field_instances['message-normalization_completed-field_meter'] = array(
     'bundle' => 'normalization_completed',
@@ -54,7 +128,7 @@ function negawatt_message_field_default_field_instances() {
         'label' => 'above',
         'module' => 'entityreference',
         'settings' => array(
-          'link' => FALSE,
+          'link' => 1,
         ),
         'type' => 'entityreference_label',
         'weight' => 0,
@@ -90,6 +164,7 @@ function negawatt_message_field_default_field_instances() {
 
   // Translatables
   // Included for use with string extractors like potx.
+  t('Account');
   t('Meter');
 
   return $field_instances;

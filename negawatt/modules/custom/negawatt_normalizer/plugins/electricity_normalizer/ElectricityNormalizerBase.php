@@ -216,11 +216,16 @@ abstract class ElectricityNormalizerBase implements \ElectricityNormalizerInterf
       '@entities' => $num_entities,
     );
 
+    // Get account-node as OG reference.
+    $wrapper = entity_metadata_wrapper('node', $node);
+    $meter_account = $wrapper->{OG_AUDIENCE_FIELD}->value();
+
     // Prepare the message.
     $user_account = user_load($node->uid);
     $message = message_create('normalization_completed', array('arguments' => $arguments), $user_account);
     $wrapper = entity_metadata_wrapper('message', $message);
     $wrapper->field_meter->set($node);
+    $wrapper->field_account->set($meter_account);
     $wrapper->save();
 
     // Save last processed node field.

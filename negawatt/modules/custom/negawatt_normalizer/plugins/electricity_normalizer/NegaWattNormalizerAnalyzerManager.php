@@ -89,10 +89,17 @@ class NegaWattNormalizerAnalyzerManager extends \ArrayObject {
     foreach ($values as $value) {
       // Generate the message.
       $node = node_load($value['nid']);
+
+      // Get account-node as OG reference.
+      $wrapper = entity_metadata_wrapper('node', $node);
+      $meter_account = $wrapper->{OG_AUDIENCE_FIELD}->value();
+
+      // Prepare the message.
       $user_account = user_load($node->uid);
       $message = message_create($value['message_type'], array('arguments' => $value['arguments']), $user_account);
       $wrapper = entity_metadata_wrapper('message', $message);
       $wrapper->field_meter->set($node);
+      $wrapper->field_account->set($meter_account);
       $wrapper->save();
     }
   }
