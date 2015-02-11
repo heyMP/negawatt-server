@@ -45,17 +45,34 @@ angular
         }
       })
       .state('dashboard', {
-        url: '/',
-        templateUrl: 'views/dashboard/main.html',
+        abstract: true,
+        url: '',
         resolve: {
           profile: function(Profile) {
             return Profile.get();
           }
         },
+        controllerProvider: function($stateParams, $state) {
+          console.log('dashboard', $stateParams, $state.current);
+          return 'DashboardCtrl';
+        }
+        //controller: function(profile) {
+        //  console.log('dashboard', profile);
+        //}
+      })
+      .state('dashboard.account', {
+        url: '/',
+        templateUrl: 'views/dashboard/main.html',
+
+        controller: 'DashboardCtrl'
+      })
+      .state('dashboard.home', {
+        url: '',
+        templateUrl: 'views/dashboard/main.html',
         controller: 'DashboardCtrl'
       })
       .state('dashboard.withAccount', {
-        url: 'dashboard/{accountId:int}',
+        url: '/dashboard/{accountId:int}',
         resolve: {
           account: function($stateParams, Profile, profile) {
             return Profile.selectAccount($stateParams.accountId, profile);
@@ -75,16 +92,16 @@ angular
           }
         },
         views: {
-          'menu@dashboard': {
+          'menu': {
             templateUrl: 'views/dashboard/main.menu.html',
             controller: 'MenuCtrl'
           },
-          'map': {
-            templateUrl: 'views/dashboard/main.map.html',
+          'map@dashboard': {
             controller: 'MapCtrl',
-          },
-          'map@dashboard.withAccount.categories': {
             templateUrl: 'views/dashboard/main.map.html',
+          },
+          'dashboard.withAccount.categories': {
+            controller: function(meters, $stateParams) { console.log('map@dashboard.withAccount', $stateParams, meters) }
           },
           'categories@dashboard': {
             templateUrl: 'views/dashboard/main.categories.html',
@@ -142,86 +159,100 @@ angular
       //    }
       //  }
       //})
-      .state('dashboard.withAccount.categories', {
-        url: '/category/{categoryId:int}',
-        views: {
-          'map@dashboard.withAccount': {
-            resolve: {
-              // Replace `meters` data previous resolved, with the cached data
-              // filtered by the selected category.
-              meters: function(Meter, $stateParams, account, $rootScope) {
-                Meter.get(account.id, $stateParams.categoryId).then(function(meters){
-                  console.log('dashboard.withAccount.categories::resolve::meters', meters);
-                  $rootScope.$broadcast('nwMetersChanged', meters);
-                });
-                return Meter.get(account.id, $stateParams.categoryId);
-              }
-            },
-            //templateUrl: 'views/dashboard/main.map.html',
-            //controller: function(meters, $stateParams) { console.log('map@dashboard.withAccount', $stateParams, meters) }
-            controller: 'MapCtrl'
-          },
-          'categories@dashboard': {
-            templateUrl: 'views/dashboard/main.categories.html',
-            controller: 'CategoryCtrl'
-          },
-          // Update chart of categories.
-          'details@dashboard': {
-            templateUrl: 'views/dashboard/main.details.html',
-            resolve: {
-              categoriesChart: function(ChartCategories, $stateParams, account, categories) {
-                return ChartCategories.get(account.id, $stateParams.categoryId, categories.collection);
-              }
-            },
-            controller: 'DetailsCtrl'
-          }
-        }
-      })
-      .state('dashboard.withAccount.markers', {
-        url: '/marker/:markerId?categoryId',
-        views: {
-          // Replace `meters` data previous resolved, with the cached data
-          // if is the case filtered by the selected category.
-          'map@dashboard': {
-            templateUrl: 'views/dashboard/main.map.html',
-            resolve: {
-              meters: function(Meter, $stateParams, account) {
-                // Necessary to resolve again to apply the filter, of category id.
-                return Meter.get(account.id, $stateParams.categoryId);
-              }
-            },
-            controller: 'MapCtrl'
-          },
-          'categories@dashboard': {
-            templateUrl: 'views/dashboard/main.categories.html',
-            controller: 'CategoryCtrl'
-          },
-          // Update the meter detailed data.
-          'details@dashboard': {
-            templateUrl: 'views/dashboard/main.details.html',
-            resolve: {
-              // Keep angular.noop because need to resolve with an empty function 'function(){}',
-              // null or {} doesn't works.
-              categoriesChart: angular.noop
-            },
-            controller: 'DetailsCtrl'
-          },
-          // Update electricity-usage chart in 'usage' sub view.
-          'usage@dashboard': {
-            templateUrl: 'views/dashboard/main.usage.html',
-            resolve: {
-              meters: function($stateParams, Meter, meters, account) {
-                // Assert get all the meters from cache, when we use lazy load.
-                return Meter.get(account.id, $stateParams.categoryId);
-              },
-              usage: function(ChartUsage, $stateParams) {
-                return ChartUsage.get('meter', $stateParams.markerId);
-              }
-            },
-            controller: 'UsageCtrl'
-          }
-        }
-      });
+      //.state('dashboard.withAccount.categories', {
+      //  url: '/category/{categoryId:int}',
+      //  views: {
+          //'map@dashboard.withAccount.categories': {
+          //  resolve: {
+          //    // Replace `meters` data previous resolved, with the cached data
+          //    // filtered by the selected category.
+          //    meters: function(Meter, $stateParams, account, $rootScope) {
+          //      Meter.get(account.id, $stateParams.categoryId).then(function(meters){
+          //        console.log('dashboard.withAccount.categories::resolve::meters', meters);
+          //        $rootScope.$broadcast('nwMetersChanged', meters);
+          //      });
+          //      return Meter.get(account.id, $stateParams.categoryId);
+          //    }
+          //  },
+          //  //templateUrl: 'views/dashboard/main.map.html',
+          //  //controller: function(meters, $stateParams) { console.log('map@dashboard.withAccount', $stateParams, meters) }
+          //  controller: 'MapCtrl'
+          //},
+      //    'map': {
+      //      resolve: {
+      //        // Replace `meters` data previous resolved, with the cached data
+      //        // filtered by the selected category.
+      //        meters: function(Meter, $stateParams, account, $rootScope) {
+      //          Meter.get(account.id, $stateParams.categoryId).then(function(meters){
+      //            console.log('dashboard.withAccount.categories::resolve::meters', meters);
+      //            $rootScope.$broadcast('nwMetersChanged', meters);
+      //          });
+      //          return Meter.get(account.id, $stateParams.categoryId);
+      //        }
+      //      },
+      //      //controller: function(meters, $stateParams) { console.log('map@dashboard.withAccount', $stateParams, meters) }
+      //    },
+      //    'categories@dashboard': {
+      //      templateUrl: 'views/dashboard/main.categories.html',
+      //      controller: 'CategoryCtrl'
+      //    },
+      //    // Update chart of categories.
+      //    'details@dashboard': {
+      //      templateUrl: 'views/dashboard/main.details.html',
+      //      resolve: {
+      //        categoriesChart: function(ChartCategories, $stateParams, account, categories) {
+      //          return ChartCategories.get(account.id, $stateParams.categoryId, categories.collection);
+      //        }
+      //      },
+      //      controller: 'DetailsCtrl'
+      //    }
+      //  }
+      //})
+      //.state('dashboard.withAccount.markers', {
+      //  url: '/marker/:markerId?categoryId',
+      //  views: {
+      //    // Replace `meters` data previous resolved, with the cached data
+      //    // if is the case filtered by the selected category.
+      //    'map@dashboard': {
+      //      templateUrl: 'views/dashboard/main.map.html',
+      //      resolve: {
+      //        meters: function(Meter, $stateParams, account) {
+      //          // Necessary to resolve again to apply the filter, of category id.
+      //          return Meter.get(account.id, $stateParams.categoryId);
+      //        }
+      //      },
+      //      controller: 'MapCtrl'
+      //    },
+      //    'categories@dashboard': {
+      //      templateUrl: 'views/dashboard/main.categories.html',
+      //      controller: 'CategoryCtrl'
+      //    },
+      //    // Update the meter detailed data.
+      //    'details@dashboard': {
+      //      templateUrl: 'views/dashboard/main.details.html',
+      //      resolve: {
+      //        // Keep angular.noop because need to resolve with an empty function 'function(){}',
+      //        // null or {} doesn't works.
+      //        categoriesChart: angular.noop
+      //      },
+      //      controller: 'DetailsCtrl'
+      //    },
+      //    // Update electricity-usage chart in 'usage' sub view.
+      //    'usage@dashboard': {
+      //      templateUrl: 'views/dashboard/main.usage.html',
+      //      resolve: {
+      //        meters: function($stateParams, Meter, meters, account) {
+      //          // Assert get all the meters from cache, when we use lazy load.
+      //          return Meter.get(account.id, $stateParams.categoryId);
+      //        },
+      //        usage: function(ChartUsage, $stateParams) {
+      //          return ChartUsage.get('meter', $stateParams.markerId);
+      //        }
+      //      },
+      //      controller: 'UsageCtrl'
+      //    }
+      //  }
+      //});
 
     // Define interceptors.
     $httpProvider.interceptors.push(function ($q, Auth, $location, localStorageService) {
