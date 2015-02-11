@@ -116,9 +116,10 @@ angular
         resolve: {
           // Replace `meters` data previous resolved, with the cached data
           // filtered by the selected category.
-          meters: function(Meter, $stateParams, account) {
+          meters: function(Meter, $stateParams, account, $rootScope) {
             Meter.get(account.id, $stateParams.categoryId).then(function(meters){
               console.log('dashboard.withAccount.categories::resolve::meters', meters);
+              $rootScope.$broadcast('nwMetersChanged', meters);
             });
             return Meter.get(account.id, $stateParams.categoryId);
           }
