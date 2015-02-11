@@ -62,6 +62,9 @@ angular
           },
           meters: function(Meter, account, $stateParams, Category) {
             // Get first 100 records.
+            Meter.get(account.id).then(function(meters) {
+              console.log('dashboard.withAccount::resolve::meters', meters);
+            });
             return Meter.get(account.id);
           },
           categories: function(Category, account) {
@@ -110,18 +113,17 @@ angular
       })
       .state('dashboard.withAccount.categories', {
         url: '/category/{categoryId:int}',
-        views: {
+        resolve: {
           // Replace `meters` data previous resolved, with the cached data
           // filtered by the selected category.
-          'map@dashboard': {
-            templateUrl: 'views/dashboard/main.map.html',
-            resolve: {
-              meters: function(Meter, $stateParams, account) {
-                return Meter.get(account.id, $stateParams.categoryId);
-              }
-            },
-            controller: 'MapCtrl'
-          },
+          meters: function(Meter, $stateParams, account) {
+            Meter.get(account.id, $stateParams.categoryId).then(function(meters){
+              console.log('dashboard.withAccount.categories::resolve::meters', meters);
+            });
+            return Meter.get(account.id, $stateParams.categoryId);
+          }
+        },
+        views: {
           'categories@dashboard': {
             templateUrl: 'views/dashboard/main.categories.html',
             controller: 'CategoryCtrl'
