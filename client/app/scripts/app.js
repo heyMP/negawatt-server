@@ -63,7 +63,7 @@ angular
           meters: function(Meter, account, $stateParams, Category) {
             // Get first 100 records.
             Meter.get(account.id).then(function(meters) {
-              console.log('dashboard.withAccount::resolve::meters', meters);
+              console.log('dashboard.withAccount::resolve::meters', meters, $stateParams);
             });
             return Meter.get(account.id);
           },
@@ -79,9 +79,12 @@ angular
             templateUrl: 'views/dashboard/main.menu.html',
             controller: 'MenuCtrl'
           },
-          'map@dashboard': {
+          'map': {
             templateUrl: 'views/dashboard/main.map.html',
-            controller: 'MapCtrl'
+            controller: 'MapCtrl',
+          },
+          'map@dashboard.withAccount.categories': {
+            templateUrl: 'views/dashboard/main.map.html',
           },
           'categories@dashboard': {
             templateUrl: 'views/dashboard/main.categories.html',
@@ -111,20 +114,53 @@ angular
           }
         }
       })
+      //.state('dashboard.withAccount.map', {
+      //  abstract: true,
+      //  views: {
+      //    'map@dashboard.withAccount.map.categories': {
+      //      templateUrl: 'views/dashboard/main.map.html'
+      //    }
+      //  }
+      //})
+      //.state('dashboard.withAccount.map.categories', {
+      //  url: '/map/category/{categoryId:int}',
+      //  views: {
+      //    'map': {
+      //      resolve: {
+      //        // Replace `meters` data previous resolved, with the cached data
+      //        // filtered by the selected category.
+      //        meters: function(Meter, $stateParams, account, $rootScope) {
+      //          Meter.get(account.id, $stateParams.categoryId).then(function(meters){
+      //            console.log('dashboard.withAccount.categories::resolve::meters', meters);
+      //            //$rootScope.$broadcast('nwMetersChanged', meters);
+      //          });
+      //          return Meter.get(account.id, $stateParams.categoryId);
+      //        }
+      //      },
+      //      //controller: function(meters, $stateParams) { console.log('map@dashboard.withAccount', $stateParams, meters) }
+      //      controller: 'MapCtrl'
+      //    }
+      //  }
+      //})
       .state('dashboard.withAccount.categories', {
         url: '/category/{categoryId:int}',
-        resolve: {
-          // Replace `meters` data previous resolved, with the cached data
-          // filtered by the selected category.
-          meters: function(Meter, $stateParams, account, $rootScope) {
-            Meter.get(account.id, $stateParams.categoryId).then(function(meters){
-              console.log('dashboard.withAccount.categories::resolve::meters', meters);
-              $rootScope.$broadcast('nwMetersChanged', meters);
-            });
-            return Meter.get(account.id, $stateParams.categoryId);
-          }
-        },
         views: {
+          'map@dashboard.withAccount': {
+            resolve: {
+              // Replace `meters` data previous resolved, with the cached data
+              // filtered by the selected category.
+              meters: function(Meter, $stateParams, account, $rootScope) {
+                Meter.get(account.id, $stateParams.categoryId).then(function(meters){
+                  console.log('dashboard.withAccount.categories::resolve::meters', meters);
+                  $rootScope.$broadcast('nwMetersChanged', meters);
+                });
+                return Meter.get(account.id, $stateParams.categoryId);
+              }
+            },
+            //templateUrl: 'views/dashboard/main.map.html',
+            //controller: function(meters, $stateParams) { console.log('map@dashboard.withAccount', $stateParams, meters) }
+            controller: 'MapCtrl'
+          },
           'categories@dashboard': {
             templateUrl: 'views/dashboard/main.categories.html',
             controller: 'CategoryCtrl'
