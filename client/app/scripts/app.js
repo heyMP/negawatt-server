@@ -44,93 +44,118 @@ angular
           $state.go('login');
         }
       })
-      .state('dashboard', {
-        abstract: true,
-        url: '',
+      .state('home', {
+        url: '/',
+        template: '<ui-view/>',
         resolve: {
           profile: function(Profile) {
             return Profile.get();
           }
         },
-        controllerProvider: function($stateParams, $state) {
-          console.log('dashboard', $stateParams, $state.current);
-          return 'DashboardCtrl';
-        }
-        //controller: function(profile) {
-        //  console.log('dashboard', profile);
-        //}
-      })
-      .state('dashboard.account', {
-        url: '/',
-        templateUrl: 'views/dashboard/main.html',
-
+        // If the pofile is defined the controller redirect to dashboard.account
+        // otherwise to login.
         controller: 'DashboardCtrl'
       })
-      .state('dashboard.home', {
-        url: '',
+      .state('dashboard', {
+        abstract: true,
+        url: '/dashboard',
         templateUrl: 'views/dashboard/main.html',
-        controller: 'DashboardCtrl'
-      })
-      .state('dashboard.withAccount', {
-        url: '/dashboard/{accountId:int}',
         resolve: {
-          account: function($stateParams, Profile, profile) {
-            return Profile.selectAccount($stateParams.accountId, profile);
-          },
-          meters: function(Meter, account, $stateParams, Category) {
-            // Get first 100 records.
-            Meter.get(account.id).then(function(meters) {
-              console.log('dashboard.withAccount::resolve::meters', meters, $stateParams);
-            });
-            return Meter.get(account.id);
-          },
-          categories: function(Category, account) {
-            return Category.get(account.id);
-          },
-          messages: function(Message) {
-            return Message.get();
+          profile: function(Profile) {
+            return Profile.get();
           }
         },
-        views: {
-          'menu': {
-            templateUrl: 'views/dashboard/main.menu.html',
-            controller: 'MenuCtrl'
-          },
-          'map@dashboard': {
-            controller: 'MapCtrl',
-            templateUrl: 'views/dashboard/main.map.html',
-          },
-          'dashboard.withAccount.categories': {
-            controller: function(meters, $stateParams) { console.log('map@dashboard.withAccount', $stateParams, meters) }
-          },
-          'categories@dashboard': {
-            templateUrl: 'views/dashboard/main.categories.html',
-            controller: 'CategoryCtrl'
-          },
-          'messages@dashboard': {
-            templateUrl: 'views/dashboard/main.messages.html',
-            controller: 'MessageCtrl'
-          },
-          'details@dashboard': {
-            templateUrl: 'views/dashboard/main.details.html',
-            resolve: {
-              categoriesChart: function(ChartCategories, account, categories, $stateParams) {
-                return ChartCategories.get(account.id, $stateParams.categoryId, categories.collection);
-              }
-            },
-            controller: 'DetailsCtrl'
-          },
-          'usage@dashboard': {
-            templateUrl: 'views/dashboard/main.usage.html',
-            resolve: {
-              usage: function(ChartUsage) {
-                return ChartUsage.get();
-              }
-            },
-            controller: 'UsageCtrl'
-          }
+        // If the pofile is defined the controller redirect to dashboard.account
+        // otherwise to login.
+        controller: 'DashboardCtrl'
+      })
+
+      //.state('dashboard.main', {
+      //  abstract: true,
+      //
+      //})
+      .state('dashboard.account', {
+        url: '/{accountId:int}',
+        resolve: {
+          //    account: function($stateParams, Profile, profile) {
+          //      return Profile.selectAccount($stateParams.accountId, profile);
+          //    },
+          //    meters: function(Meter, account, $stateParams, Category) {
+          //      // Get first 100 records.
+          //      Meter.get(account.id).then(function(meters) {
+          //        console.log('dashboard.withAccount::resolve::meters', meters, $stateParams);
+          //      });
+          //      return Meter.get(account.id);
+          //    },
+          //    categories: function(Category, account) {
+          //      return Category.get(account.id);
+          //    },
+          //    messages: function(Message) {
+          //      return Message.get();
+          //    }
+          //  },
         }
       })
+      //.state('dashboard.withAccount', {
+      //  url: '/dashboard/{accountId:int}',
+      //  resolve: {
+      //    account: function($stateParams, Profile, profile) {
+      //      return Profile.selectAccount($stateParams.accountId, profile);
+      //    },
+      //    meters: function(Meter, account, $stateParams, Category) {
+      //      // Get first 100 records.
+      //      Meter.get(account.id).then(function(meters) {
+      //        console.log('dashboard.withAccount::resolve::meters', meters, $stateParams);
+      //      });
+      //      return Meter.get(account.id);
+      //    },
+      //    categories: function(Category, account) {
+      //      return Category.get(account.id);
+      //    },
+      //    messages: function(Message) {
+      //      return Message.get();
+      //    }
+      //  },
+      //  views: {
+      //    'menu': {
+      //      templateUrl: 'views/dashboard/main.menu.html',
+      //      controller: 'MenuCtrl'
+      //    },
+      //    'map@dashboard': {
+      //      controller: 'MapCtrl',
+      //      templateUrl: 'views/dashboard/main.map.html',
+      //    },
+      //    'dashboard.withAccount.categories': {
+      //      controller: function(meters, $stateParams) { console.log('map@dashboard.withAccount', $stateParams, meters) }
+      //    },
+      //    'categories@dashboard': {
+      //      templateUrl: 'views/dashboard/main.categories.html',
+      //      controller: 'CategoryCtrl'
+      //    },
+      //    'messages@dashboard': {
+      //      templateUrl: 'views/dashboard/main.messages.html',
+      //      controller: 'MessageCtrl'
+      //    },
+      //    'details@dashboard': {
+      //      templateUrl: 'views/dashboard/main.details.html',
+      //      resolve: {
+      //        categoriesChart: function(ChartCategories, account, categories, $stateParams) {
+      //          return ChartCategories.get(account.id, $stateParams.categoryId, categories.collection);
+      //        }
+      //      },
+      //      controller: 'DetailsCtrl'
+      //    },
+      //    'usage@dashboard': {
+      //      templateUrl: 'views/dashboard/main.usage.html',
+      //      resolve: {
+      //        usage: function(ChartUsage) {
+      //          return ChartUsage.get();
+      //        }
+      //      },
+      //      controller: 'UsageCtrl'
+      //    }
+      //  }
+      //})
       //.state('dashboard.withAccount.map', {
       //  abstract: true,
       //  views: {
@@ -312,10 +337,10 @@ angular
       $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
         $log.log('$stateChangeSuccess to ' + toState.name + '- fired once the state transition is complete.');
       });
-
-      $rootScope.$on('$viewContentLoaded', function (event) {
-        $log.log('$viewContentLoaded - fired after dom rendered', event);
-      });
+      //
+      //$rootScope.$on('$viewContentLoaded', function (event) {
+      //  $log.log('$viewContentLoaded - fired after dom rendered', event);
+      //});
 
       $rootScope.$on('$stateNotFound', function (event, unfoundState, fromState, fromParams) {
         $log.log('$stateNotFound ' + unfoundState.to + '  - fired when a state cannot be found by its name.');
