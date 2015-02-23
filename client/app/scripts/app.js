@@ -54,6 +54,7 @@ angular
         }
       })
       .state('main', {
+        // path: /#/
         url: '/',
         template: '<ui-view/>',
         resolve: {
@@ -67,11 +68,13 @@ angular
       })
       .state('main.dashboard', {
         abstract: true,
+        // path: '/#/dashboard'
         url: 'dashboard',
         templateUrl: 'views/dashboard/main.html',
       })
       .state('main.dashboard.map', {
         abstract: true,
+        // path: '/#/dashboard/'
         url: '/',
         // With params property is possible catch, child params.
         params: {
@@ -102,6 +105,7 @@ angular
         }
       })
       .state('main.dashboard.map.account', {
+        // path: '/#/dashboard/[0-9]/' || '/#/dashboard/[0-9]/?chartFreq=2'
         url: '{accountId:int}/?:chartFreq',
         params: {
           chartFreq: {
@@ -149,17 +153,18 @@ angular
         }
       })
       .state('main.dashboard.map.account.categories', {
-        url: 'category/{categoryId:int}',
-        views: {
-          // Replace `meters` data previous resolved, with the cached data
-          // filtered by the selected category.
-          '@main.dashboard': {
-            controller: function($rootScope) {
-              console.log('**** ENTER');
-              var meters = {};
-              $rootScope.$broadcast('nwMetersChanged', meters);
-            }
-          }
+        // path: '/#/dashboard/[0-9]/category/[0-9]/' || '/#/dashboard/[0-9]/category/[0-9]/?chartFreq=2'
+        url: 'category/{categoryId:int}/',
+        //views: {
+        //  // Replace `meters` data previous resolved, with the cached data
+        //  // filtered by the selected category.
+        //  '@main.dashboard': {
+        //    controller: function($rootScope) {
+        //      console.log('**** ENTER');
+        //      var meters = {};
+        //      $rootScope.$broadcast('nwMetersChanged', meters);
+        //    }
+        //  }
           //'map@main.dashboard': {
           //  resolve: {
           //    meters: function(Meter, $rootScope, $stateParams, account) {
@@ -203,7 +208,7 @@ angular
           //  },
           //  controller: 'DetailsCtrl'
           //}
-        }
+        //}
       });
       //.state('dashboard.account.markers', {
       //  url: '/marker/:markerId?categoryId',
