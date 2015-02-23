@@ -74,28 +74,24 @@ angular
         //abstract: true,
         url: '/',
         params: {
+          // With params property is possible catch, child params.
           accountId: function($stateParams) {
             return $stateParams.accountId;
+          }
+        },
+        resolve: {
+          account: function($stateParams, Profile, profile) {
+            console.log($stateParams);
+            return Profile.selectAccount($stateParams.accountId, profile);
+          },
+          meters: function(Meter, account, $stateParams, Category) {
+            // Get first 100 records.
+            return Meter.get(account.id);
           }
         },
         views: {
           'map': {
             templateUrl: 'views/dashboard/main.map.html',
-            //resolve: {
-            //  account: function($stateParams, Profile, profile) {
-            //    console.log($stateParams, Profile, profile);
-            //    return Profile.selectAccount($stateParams.accountId, profile);
-            //  },
-            //  meters: function(Meter, account, $stateParams, Category) {
-            //    category
-            //    // Get first 100 records.
-            //    return Meter.get(account.id);
-            //  },
-            //},
-            resolve: {
-              account: angular.noop,
-              meters: angular.noop
-            },
             controller: 'MapCtrl'
           }
         }

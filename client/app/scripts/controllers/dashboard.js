@@ -10,8 +10,7 @@ angular.module('negawattClientApp')
       if (!(Object.keys($stateParams).length) && $state.is('main')  ) {
         // Get active account after login.
         defaultAccountId = profile.account[0].id;
-        //$state.go('main.dashboard.map.account', {accountId: defaultAccountId});
-        $state.go('main.dashboard.map', {accountId: defaultAccountId});
+        $state.go('main.dashboard.map.account', {accountId: defaultAccountId});
       }
     }
     else {
