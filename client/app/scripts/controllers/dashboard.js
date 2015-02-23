@@ -5,12 +5,13 @@ angular.module('negawattClientApp')
     console.log('DashboardCtrl', profile, $stateParams );
     var defaultAccountId;
     if (profile) {
-      console.log(!(Object.keys($stateParams).length), $state.is('home') );
+      console.log(!(Object.keys($stateParams).length), $state.is('main') );
       // Apply only on the login wotkflow.
-      if (!(Object.keys($stateParams).length) && $state.is('home')  ) {
+      if (!(Object.keys($stateParams).length) && $state.is('main')  ) {
         // Get active account after login.
         defaultAccountId = profile.account[0].id;
-        $state.go('dashboard.account', {accountId: defaultAccountId});
+        //$state.go('main.dashboard.map.account', {accountId: defaultAccountId});
+        $state.go('main.dashboard.map', {accountId: defaultAccountId});
       }
     }
     else {

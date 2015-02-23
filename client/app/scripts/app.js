@@ -34,6 +34,7 @@ angular
     // fix router paths.
     $urlRouterProvider.when('/login/', '/login');
     $urlRouterProvider.when('/logout/', '/logout');
+    $urlRouterProvider.when('', '/');
 
     // For any unmatched url, redirect to '/'.
     $urlRouterProvider.otherwise('/');
@@ -52,20 +53,8 @@ angular
           $state.go('login');
         }
       })
-      .state('home', {
-        url: '',
-        template: '<ui-view/>',
-        resolve: {
-          profile: function(Profile) {
-            return Profile.get();
-          }
-        },
-        // If the pofile is defined the controller redirect to dashboard.account
-        // otherwise to login.
-        controller: 'DashboardCtrl'
-      })
       .state('main', {
-        url: '',
+        url: '/',
         template: '<ui-view/>',
         resolve: {
           profile: function(Profile) {
@@ -76,27 +65,43 @@ angular
         // otherwise to login.
         controller: 'DashboardCtrl'
       })
-      .state('dashboard', {
+      .state('main.dashboard', {
         abstract: true,
         url: 'dashboard',
         templateUrl: 'views/dashboard/main.html',
-        resolve: {
-          profile: function(Profile) {
-            return Profile.get();
+      })
+      .state('main.dashboard.map', {
+        //abstract: true,
+        url: '/',
+        params: {
+          accountId: function($stateParams) {
+            return $stateParams.accountId;
           }
         },
-        //views: {
-        //  'map': {
-        //    templateUrl: 'views/dashboard/main.map.html',
-        //    controller: 'MapCtrl'
-        //  }
-        //}
-        // If the pofile is defined the controller redirect to dashboard.account
-        // otherwise to login.
-        controller: 'DashboardCtrl'
+        views: {
+          'map': {
+            templateUrl: 'views/dashboard/main.map.html',
+            //resolve: {
+            //  account: function($stateParams, Profile, profile) {
+            //    console.log($stateParams, Profile, profile);
+            //    return Profile.selectAccount($stateParams.accountId, profile);
+            //  },
+            //  meters: function(Meter, account, $stateParams, Category) {
+            //    category
+            //    // Get first 100 records.
+            //    return Meter.get(account.id);
+            //  },
+            //},
+            resolve: {
+              account: angular.noop,
+              meters: angular.noop
+            },
+            controller: 'MapCtrl'
+          }
+        }
       })
-      .state('dashboard.account', {
-        url: '/{accountId:int}?:chartFreq',
+      .state('main.dashboard.map.account', {
+        url: '{accountId:int}?:chartFreq',
         params: {
           chartFreq: {
             // Keep monthly chart type by default.
@@ -104,9 +109,6 @@ angular
           }
         },
         resolve: {
-          account: function($stateParams, Profile, profile) {
-            return Profile.selectAccount($stateParams.accountId, profile);
-          },
           meters: function(Meter, account, $stateParams, Category) {
             // Get first 100 records.
             return Meter.get(account.id);
@@ -123,42 +125,42 @@ angular
             templateUrl: 'views/dashboard/main.menu.html',
             controller: 'MenuCtrl'
           },
-          //'map@dashboard': {
-          //  templateUrl: 'views/dashboard/main.map.html',
-          //  controller: 'MapCtrl'
+          ////'map@dashboard': {
+          ////  templateUrl: 'views/dashboard/main.map.html',
+          ////  controller: 'MapCtrl'
+          ////},
+          //'categories@dashboard': {
+          //  templateUrl: 'views/dashboard/main.categories.html',
+          //  controller: 'CategoryCtrl'
           //},
-          'categories@dashboard': {
-            templateUrl: 'views/dashboard/main.categories.html',
-            controller: 'CategoryCtrl'
-          },
-          'messages@dashboard': {
-            templateUrl: 'views/dashboard/main.messages.html',
-            controller: 'MessageCtrl'
-          },
-          'details@dashboard': {
-            templateUrl: 'views/dashboard/main.details.html',
-            resolve: {
-              categoriesChart: function(ChartCategories, account, categories, $stateParams) {
-                return ChartCategories.get(account.id, $stateParams.categoryId, categories.collection);
-              }
-            },
-            controller: 'DetailsCtrl'
-          },
-          'usage@dashboard': {
-            templateUrl: 'views/dashboard/main.usage.html',
-            resolve: {
-              // Get electricity data and transform it into chart format.
-              usage: function(ChartUsage, $state, $stateParams, account) {
-                // Perform the GET only if we're in the proper (parent) state.
-                if ($state.current.name == 'dashboard.withAccount') {
-                  return ChartUsage.get(account.id, $stateParams);
-                } else {
-                  return {};
-                }
-              }
-            },
-            controller: 'UsageCtrl'
-          }
+          //'messages@dashboard': {
+          //  templateUrl: 'views/dashboard/main.messages.html',
+          //  controller: 'MessageCtrl'
+          //},
+          //'details@dashboard': {
+          //  templateUrl: 'views/dashboard/main.details.html',
+          //  resolve: {
+          //    categoriesChart: function(ChartCategories, account, categories, $stateParams) {
+          //      return ChartCategories.get(account.id, $stateParams.categoryId, categories.collection);
+          //    }
+          //  },
+          //  controller: 'DetailsCtrl'
+          //},
+          //'usage@dashboard': {
+          //  templateUrl: 'views/dashboard/main.usage.html',
+          //  resolve: {
+          //    // Get electricity data and transform it into chart format.
+          //    usage: function(ChartUsage, $state, $stateParams, account) {
+          //      // Perform the GET only if we're in the proper (parent) state.
+          //      if ($state.current.name == 'dashboard.withAccount') {
+          //        return ChartUsage.get(account.id, $stateParams);
+          //      } else {
+          //        return {};
+          //      }
+          //    }
+          //  },
+          //  controller: 'UsageCtrl'
+          //}
         }
       });
       //.state('dashboard.account.categories', {
