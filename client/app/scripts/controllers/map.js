@@ -2,7 +2,7 @@
 
 angular.module('negawattClientApp')
   .controller('MapCtrl', function ($scope, $state, $stateParams, Category, ChartUsage, Map, leafletData, $timeout, account, meters) {
-    console.log('MapCtrl::meters', meters, account);
+    console.log('MapCtrl::meters', meters);
 
     // Config map.
     $scope.defaults = Map.getConfig();

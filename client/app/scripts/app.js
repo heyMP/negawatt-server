@@ -81,7 +81,6 @@ angular
         },
         resolve: {
           account: function($stateParams, Profile, profile) {
-            console.log('main.dashboard.map', $stateParams);
             return Profile.selectAccount($stateParams.accountId, profile);
           },
           meters: function(Meter, account, $stateParams, Category) {
@@ -99,11 +98,6 @@ angular
           'map': {
             templateUrl: 'views/dashboard/main.map.html',
             controller: 'MapCtrl'
-          },
-          'map@main.dashboard.map.account.categories': {
-            controller: function() {
-              console.log('ENTER main.dashboard.map.account.categories ***** ');
-            }
           }
         }
       })
@@ -157,20 +151,33 @@ angular
       .state('main.dashboard.map.account.categories', {
         url: 'category/{categoryId:int}',
         views: {
-           // Replace `meters` data previous resolved, with the cached data
-           // filtered by the selected category.
-          'map': {
-            resolve: {
-              meters: function(Meter, $rootScope, $stateParams, account) {
-                // Update
-                Meter.get(account.id, $stateParams.categoryId).then(function(meters) {
-                  $rootScope.$broadcast('nwMetersChanged', meters);
-
-                });
-              }
-            },
-            controller: 'MapCtrl'
-          },
+          // Replace `meters` data previous resolved, with the cached data
+          // filtered by the selected category.
+          '@main.dashboard': {
+            controller: function($rootScope) {
+              console.log('**** ENTER');
+              var meters = {};
+              $rootScope.$broadcast('nwMetersChanged', meters);
+            }
+          }
+          //'map@main.dashboard': {
+          //  resolve: {
+          //    meters: function(Meter, $rootScope, $stateParams, account) {
+          //      // Update
+          //      Meter.get(account.id, $stateParams.categoryId).then(function(meters) {
+          //        $rootScope.$broadcast('nwMetersChanged', meters);
+          //
+          //      });
+          //    },
+          //    account: function(account) {
+          //      return account;
+          //    }
+          //  },
+          //  controller: function() {
+          //    console.log('ENTER main.dashboard.map.account.categories ***** ');
+          //  },
+          //  templateUrl: 'views/dashboard/main.map.html'
+          //}
           // Update usage-chart to show category summary.
           //'usage@dashboard': {
           //  templateUrl: 'views/dashboard/main.usage.html',

@@ -6,6 +6,7 @@ angular.module('negawattClientApp')
     var defaultAccountId;
     if (profile) {
       console.log(!(Object.keys($stateParams).length), $state.is('main') );
+        console.log('### curent', $state.current.name);
       // Apply only on the login wotkflow.
       if (!(Object.keys($stateParams).length) && $state.is('main')  ) {
         // Get active account after login.
