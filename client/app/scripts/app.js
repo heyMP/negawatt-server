@@ -71,10 +71,10 @@ angular
         templateUrl: 'views/dashboard/main.html',
       })
       .state('main.dashboard.map', {
-        //abstract: true,
+        abstract: true,
         url: '/',
+        // With params property is possible catch, child params.
         params: {
-          // With params property is possible catch, child params.
           accountId: function($stateParams) {
             return $stateParams.accountId;
           }
@@ -87,6 +87,12 @@ angular
           meters: function(Meter, account, $stateParams, Category) {
             // Get first 100 records.
             return Meter.get(account.id);
+          },
+          categories: function(Category, account) {
+            return Category.get(account.id);
+          },
+          messages: function(Message) {
+            return Message.get();
           }
         },
         views: {
@@ -104,35 +110,19 @@ angular
             value: 2
           }
         },
-        resolve: {
-          meters: function(Meter, account, $stateParams, Category) {
-            // Get first 100 records.
-            return Meter.get(account.id);
-          },
-          categories: function(Category, account) {
-            return Category.get(account.id);
-          },
-          messages: function(Message) {
-            return Message.get();
-          }
-        },
         views: {
-          'menu@dashboard': {
+          'menu@main.dashboard': {
             templateUrl: 'views/dashboard/main.menu.html',
             controller: 'MenuCtrl'
           },
-          ////'map@dashboard': {
-          ////  templateUrl: 'views/dashboard/main.map.html',
-          ////  controller: 'MapCtrl'
-          ////},
-          //'categories@dashboard': {
-          //  templateUrl: 'views/dashboard/main.categories.html',
-          //  controller: 'CategoryCtrl'
-          //},
-          //'messages@dashboard': {
-          //  templateUrl: 'views/dashboard/main.messages.html',
-          //  controller: 'MessageCtrl'
-          //},
+          'categories@main.dashboard': {
+            templateUrl: 'views/dashboard/main.categories.html',
+            controller: 'CategoryCtrl'
+          },
+          'messages@main.dashboard': {
+            templateUrl: 'views/dashboard/main.messages.html',
+            controller: 'MessageCtrl'
+          },
           //'details@dashboard': {
           //  templateUrl: 'views/dashboard/main.details.html',
           //  resolve: {
@@ -158,48 +148,48 @@ angular
           //  controller: 'UsageCtrl'
           //}
         }
+      })
+      .state('dashboard.account.categories', {
+        url: '/category/{categoryId:int}',
+        views: {
+          // Replace `meters` data previous resolved, with the cached data
+          // filtered by the selected category.
+          'map@main.dashboard': {
+            //templateUrl: 'views/dashboard/main.map.html',
+            resolve: {
+              meters: function(Meter, $stateParams, account) {
+                return Meter.get(account.id, $stateParams.categoryId);
+              }
+            },
+            //controller: 'MapCtrl'
+          },
+          // Update usage-chart to show category summary.
+          //'usage@dashboard': {
+          //  templateUrl: 'views/dashboard/main.usage.html',
+          //  resolve: {
+          //    // Get electricity data and transform it into chart format.
+          //    usage: function(ChartUsage, $stateParams, account) {
+          //      return ChartUsage.get(account.id, $stateParams);
+          //    }
+          //  },
+          //  controller: 'UsageCtrl'
+          //},
+          //'categories@dashboard': {
+          //  templateUrl: 'views/dashboard/main.categories.html',
+          //  controller: 'CategoryCtrl'
+          //},
+          //// Update details (pie) chart for categories.
+          //'details@dashboard': {
+          //  templateUrl: 'views/dashboard/main.details.html',
+          //  resolve: {
+          //    categoriesChart: function(ChartCategories, $stateParams, account, categories) {
+          //      return ChartCategories.get(account.id, $stateParams.categoryId, categories.collection);
+          //    }
+          //  },
+          //  controller: 'DetailsCtrl'
+          //}
+        }
       });
-      //.state('dashboard.account.categories', {
-      //  url: '/category/{categoryId:int}',
-      //  views: {
-      //    // Replace `meters` data previous resolved, with the cached data
-      //    // filtered by the selected category.
-      //    'map@dashboard': {
-      //      templateUrl: 'views/dashboard/main.map.html',
-      //      resolve: {
-      //        meters: function(Meter, $stateParams, account) {
-      //          return Meter.get(account.id, $stateParams.categoryId);
-      //        }
-      //      },
-      //      controller: 'MapCtrl'
-      //    },
-      //    // Update usage-chart to show category summary.
-      //    'usage@dashboard': {
-      //      templateUrl: 'views/dashboard/main.usage.html',
-      //      resolve: {
-      //        // Get electricity data and transform it into chart format.
-      //        usage: function(ChartUsage, $stateParams, account) {
-      //          return ChartUsage.get(account.id, $stateParams);
-      //        }
-      //      },
-      //      controller: 'UsageCtrl'
-      //    },
-      //    'categories@dashboard': {
-      //      templateUrl: 'views/dashboard/main.categories.html',
-      //      controller: 'CategoryCtrl'
-      //    },
-      //    // Update details (pie) chart for categories.
-      //    'details@dashboard': {
-      //      templateUrl: 'views/dashboard/main.details.html',
-      //      resolve: {
-      //        categoriesChart: function(ChartCategories, $stateParams, account, categories) {
-      //          return ChartCategories.get(account.id, $stateParams.categoryId, categories.collection);
-      //        }
-      //      },
-      //      controller: 'DetailsCtrl'
-      //    }
-      //  }
-      //})
       //.state('dashboard.account.markers', {
       //  url: '/marker/:markerId?categoryId',
       //  views: {
