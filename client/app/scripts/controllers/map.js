@@ -2,7 +2,7 @@
 
 angular.module('negawattClientApp')
   .controller('MapCtrl', function ($scope, $state, $stateParams, Category, ChartUsage, Map, leafletData, $timeout, account, meters) {
-    console.log('MapCtrl::meters', meters);
+    console.log('MapCtrl::meters', meters, account);
 
     // Config map.
     $scope.defaults = Map.getConfig();
@@ -45,6 +45,7 @@ angular.module('negawattClientApp')
 
     // Reload the current $state when meters added more.
     $scope.$on('nwMetersChanged', function(event, meters) {
+      console.log('nwMetersChanged executed!');
       $scope.meters = meters;
     });
 

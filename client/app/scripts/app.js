@@ -81,7 +81,7 @@ angular
         },
         resolve: {
           account: function($stateParams, Profile, profile) {
-            console.log($stateParams);
+            console.log('main.dashboard.map', $stateParams);
             return Profile.selectAccount($stateParams.accountId, profile);
           },
           meters: function(Meter, account, $stateParams, Category) {
@@ -99,11 +99,16 @@ angular
           'map': {
             templateUrl: 'views/dashboard/main.map.html',
             controller: 'MapCtrl'
+          },
+          'map@main.dashboard.map.account.categories': {
+            controller: function() {
+              console.log('ENTER main.dashboard.map.account.categories ***** ');
+            }
           }
         }
       })
       .state('main.dashboard.map.account', {
-        url: '{accountId:int}?:chartFreq',
+        url: '{accountId:int}/?:chartFreq',
         params: {
           chartFreq: {
             // Keep monthly chart type by default.
@@ -122,7 +127,7 @@ angular
           'messages@main.dashboard': {
             templateUrl: 'views/dashboard/main.messages.html',
             controller: 'MessageCtrl'
-          },
+          }
           //'details@dashboard': {
           //  templateUrl: 'views/dashboard/main.details.html',
           //  resolve: {
@@ -149,19 +154,22 @@ angular
           //}
         }
       })
-      .state('dashboard.account.categories', {
-        url: '/category/{categoryId:int}',
+      .state('main.dashboard.map.account.categories', {
+        url: 'category/{categoryId:int}',
         views: {
-          // Replace `meters` data previous resolved, with the cached data
-          // filtered by the selected category.
-          'map@main.dashboard': {
-            //templateUrl: 'views/dashboard/main.map.html',
+           // Replace `meters` data previous resolved, with the cached data
+           // filtered by the selected category.
+          'map': {
             resolve: {
-              meters: function(Meter, $stateParams, account) {
-                return Meter.get(account.id, $stateParams.categoryId);
+              meters: function(Meter, $rootScope, $stateParams, account) {
+                // Update
+                Meter.get(account.id, $stateParams.categoryId).then(function(meters) {
+                  $rootScope.$broadcast('nwMetersChanged', meters);
+
+                });
               }
             },
-            //controller: 'MapCtrl'
+            controller: 'MapCtrl'
           },
           // Update usage-chart to show category summary.
           //'usage@dashboard': {
