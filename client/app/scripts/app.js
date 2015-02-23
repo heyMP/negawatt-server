@@ -30,6 +30,11 @@ angular
     'angularMoment'
   ])
   .config(function ($stateProvider, $urlRouterProvider, $httpProvider, cfpLoadingBarProvider) {
+
+    // fix router paths.
+    $urlRouterProvider.when('/login/', '/login');
+    $urlRouterProvider.when('/logout/', '/logout');
+
     // For any unmatched url, redirect to '/'.
     $urlRouterProvider.otherwise('/');
 
@@ -48,7 +53,19 @@ angular
         }
       })
       .state('home', {
-        url: '/',
+        url: '',
+        template: '<ui-view/>',
+        resolve: {
+          profile: function(Profile) {
+            return Profile.get();
+          }
+        },
+        // If the pofile is defined the controller redirect to dashboard.account
+        // otherwise to login.
+        controller: 'DashboardCtrl'
+      })
+      .state('main', {
+        url: '',
         template: '<ui-view/>',
         resolve: {
           profile: function(Profile) {
@@ -61,19 +78,25 @@ angular
       })
       .state('dashboard', {
         abstract: true,
-        url: '/dashboard',
+        url: 'dashboard',
         templateUrl: 'views/dashboard/main.html',
         resolve: {
           profile: function(Profile) {
             return Profile.get();
           }
         },
+        //views: {
+        //  'map': {
+        //    templateUrl: 'views/dashboard/main.map.html',
+        //    controller: 'MapCtrl'
+        //  }
+        //}
         // If the pofile is defined the controller redirect to dashboard.account
         // otherwise to login.
         controller: 'DashboardCtrl'
       })
       .state('dashboard.account', {
-        url: 'dashboard/{accountId:int}?:chartFreq',
+        url: '/{accountId:int}?:chartFreq',
         params: {
           chartFreq: {
             // Keep monthly chart type by default.
@@ -100,10 +123,10 @@ angular
             templateUrl: 'views/dashboard/main.menu.html',
             controller: 'MenuCtrl'
           },
-          'map@dashboard': {
-            templateUrl: 'views/dashboard/main.map.html',
-            controller: 'MapCtrl'
-          },
+          //'map@dashboard': {
+          //  templateUrl: 'views/dashboard/main.map.html',
+          //  controller: 'MapCtrl'
+          //},
           'categories@dashboard': {
             templateUrl: 'views/dashboard/main.categories.html',
             controller: 'CategoryCtrl'
@@ -137,90 +160,90 @@ angular
             controller: 'UsageCtrl'
           }
         }
-      })
-      .state('dashboard.account.categories', {
-        url: '/category/{categoryId:int}',
-        views: {
-          // Replace `meters` data previous resolved, with the cached data
-          // filtered by the selected category.
-          'map@dashboard': {
-            templateUrl: 'views/dashboard/main.map.html',
-            resolve: {
-              meters: function(Meter, $stateParams, account) {
-                return Meter.get(account.id, $stateParams.categoryId);
-              }
-            },
-            controller: 'MapCtrl'
-          },
-          // Update usage-chart to show category summary.
-          'usage@dashboard': {
-            templateUrl: 'views/dashboard/main.usage.html',
-            resolve: {
-              // Get electricity data and transform it into chart format.
-              usage: function(ChartUsage, $stateParams, account) {
-                return ChartUsage.get(account.id, $stateParams);
-              }
-            },
-            controller: 'UsageCtrl'
-          },
-          'categories@dashboard': {
-            templateUrl: 'views/dashboard/main.categories.html',
-            controller: 'CategoryCtrl'
-          },
-          // Update details (pie) chart for categories.
-          'details@dashboard': {
-            templateUrl: 'views/dashboard/main.details.html',
-            resolve: {
-              categoriesChart: function(ChartCategories, $stateParams, account, categories) {
-                return ChartCategories.get(account.id, $stateParams.categoryId, categories.collection);
-              }
-            },
-            controller: 'DetailsCtrl'
-          }
-        }
-      })
-      .state('dashboard.account.markers', {
-        url: '/marker/:markerId?categoryId',
-        views: {
-          // Replace `meters` data previous resolved, with the cached data
-          // if is the case filtered by the selected category.
-          'map@dashboard': {
-            templateUrl: 'views/dashboard/main.map.html',
-            resolve: {
-              meters: function(Meter, $stateParams, account) {
-                // Necessary to resolve again to apply the filter, of category id.
-                return Meter.get(account.id, $stateParams.categoryId);
-              }
-            },
-            controller: 'MapCtrl'
-          },
-          'categories@dashboard': {
-            templateUrl: 'views/dashboard/main.categories.html',
-            controller: 'CategoryCtrl'
-          },
-          // Update the meter detailed data.
-          'details@dashboard': {
-            templateUrl: 'views/dashboard/main.details.html',
-            resolve: {
-              // Keep angular.noop because need to resolve with an empty function 'function(){}',
-              // null or {} doesn't works.
-              categoriesChart: angular.noop
-            },
-            controller: 'DetailsCtrl'
-          },
-          // Update electricity-usage chart in 'usage' sub view.
-          'usage@dashboard': {
-            templateUrl: 'views/dashboard/main.usage.html',
-            resolve: {
-              // Get electricity data and transform it into chart format.
-              usage: function(ChartUsage, $stateParams, account) {
-                return ChartUsage.get(account.id, $stateParams);
-              }
-            },
-            controller: 'UsageCtrl'
-          }
-        }
       });
+      //.state('dashboard.account.categories', {
+      //  url: '/category/{categoryId:int}',
+      //  views: {
+      //    // Replace `meters` data previous resolved, with the cached data
+      //    // filtered by the selected category.
+      //    'map@dashboard': {
+      //      templateUrl: 'views/dashboard/main.map.html',
+      //      resolve: {
+      //        meters: function(Meter, $stateParams, account) {
+      //          return Meter.get(account.id, $stateParams.categoryId);
+      //        }
+      //      },
+      //      controller: 'MapCtrl'
+      //    },
+      //    // Update usage-chart to show category summary.
+      //    'usage@dashboard': {
+      //      templateUrl: 'views/dashboard/main.usage.html',
+      //      resolve: {
+      //        // Get electricity data and transform it into chart format.
+      //        usage: function(ChartUsage, $stateParams, account) {
+      //          return ChartUsage.get(account.id, $stateParams);
+      //        }
+      //      },
+      //      controller: 'UsageCtrl'
+      //    },
+      //    'categories@dashboard': {
+      //      templateUrl: 'views/dashboard/main.categories.html',
+      //      controller: 'CategoryCtrl'
+      //    },
+      //    // Update details (pie) chart for categories.
+      //    'details@dashboard': {
+      //      templateUrl: 'views/dashboard/main.details.html',
+      //      resolve: {
+      //        categoriesChart: function(ChartCategories, $stateParams, account, categories) {
+      //          return ChartCategories.get(account.id, $stateParams.categoryId, categories.collection);
+      //        }
+      //      },
+      //      controller: 'DetailsCtrl'
+      //    }
+      //  }
+      //})
+      //.state('dashboard.account.markers', {
+      //  url: '/marker/:markerId?categoryId',
+      //  views: {
+      //    // Replace `meters` data previous resolved, with the cached data
+      //    // if is the case filtered by the selected category.
+      //    'map@dashboard': {
+      //      templateUrl: 'views/dashboard/main.map.html',
+      //      resolve: {
+      //        meters: function(Meter, $stateParams, account) {
+      //          // Necessary to resolve again to apply the filter, of category id.
+      //          return Meter.get(account.id, $stateParams.categoryId);
+      //        }
+      //      },
+      //      controller: 'MapCtrl'
+      //    },
+      //    'categories@dashboard': {
+      //      templateUrl: 'views/dashboard/main.categories.html',
+      //      controller: 'CategoryCtrl'
+      //    },
+      //    // Update the meter detailed data.
+      //    'details@dashboard': {
+      //      templateUrl: 'views/dashboard/main.details.html',
+      //      resolve: {
+      //        // Keep angular.noop because need to resolve with an empty function 'function(){}',
+      //        // null or {} doesn't works.
+      //        categoriesChart: angular.noop
+      //      },
+      //      controller: 'DetailsCtrl'
+      //    },
+      //    // Update electricity-usage chart in 'usage' sub view.
+      //    'usage@dashboard': {
+      //      templateUrl: 'views/dashboard/main.usage.html',
+      //      resolve: {
+      //        // Get electricity data and transform it into chart format.
+      //        usage: function(ChartUsage, $stateParams, account) {
+      //          return ChartUsage.get(account.id, $stateParams);
+      //        }
+      //      },
+      //      controller: 'UsageCtrl'
+      //    }
+      //  }
+      //});
 
     // Define interceptors.
     $httpProvider.interceptors.push(function ($q, Auth, $location, localStorageService) {

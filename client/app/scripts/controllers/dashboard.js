@@ -2,7 +2,7 @@
 
 angular.module('negawattClientApp')
   .controller('DashboardCtrl', function ($state, $stateParams, profile) {
-    console.log('DashboardCtrl' );
+    console.log('DashboardCtrl', profile, $stateParams );
     var defaultAccountId;
     if (profile) {
       console.log(!(Object.keys($stateParams).length), $state.is('home') );
