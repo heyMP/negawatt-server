@@ -112,6 +112,7 @@ angular
             // Keep monthly chart type by default.
             value: 2
           }
+
         },
         views: {
           'menu@main.dashboard': {
@@ -155,6 +156,12 @@ angular
       .state('main.dashboard.map.account.categories', {
         // path: '/#/dashboard/[0-9]/category/[0-9]/' || '/#/dashboard/[0-9]/category/[0-9]/?chartFreq=2'
         url: 'category/{categoryId:int}/',
+        resolve: {
+          account: function(account, profile) {
+            console.log(account, profile);
+            return account;
+          }
+        }
         //views: {
         //  // Replace `meters` data previous resolved, with the cached data
         //  // filtered by the selected category.
