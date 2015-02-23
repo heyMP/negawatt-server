@@ -37,6 +37,11 @@ angular.module('negawattClientApp')
       var active,
         position;
 
+      // Check in on data type.
+      if (angular.isString(accountId)) {
+        accountId = parseInt(accountId);
+      }
+
       // Get select the account as active.
       active = $filter('filter')(profile.account, {id: accountId});
 

@@ -112,7 +112,6 @@ angular
             // Keep monthly chart type by default.
             value: 2
           }
-
         },
         views: {
           'menu@main.dashboard': {
