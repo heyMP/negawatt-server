@@ -2,15 +2,15 @@
 <h3 class="menu-title">NegaWatt</h3>
 <span class="menu-separator"></span>
 <div class="menu-home">
-  <a ng-click="reloadDashboard()" href="">
-    <img src="../../images/icon-home.png" alt=""/>
+  <a ng-click="reloadDashboard()" href="" class="menu-btn-home"">
+    <img src="../../images/icon-home.png" alt="" ng-class="{'dn-fadeIn': ngAnimationPulse}"/>
   </a>
 </div>
 <span class="menu-separator"></span>
 <div ng-controller="AccessCtrl" class="menu-account">
-  <img class="menu-account-photo" src="../../images/photo.png" alt=""/><span> שלום,   {{ user.label }} </span>
+  <img class="menu-account-photo" src="../../images/photo.png" alt=""/><span> שלום, {{ user.label }} </span>
   <img class="menu-account-logout" src="../../images/icon-arrow.png" alt=""/>
-  <a ng-click="logout()">  התנתק </a>
+  <a ng-click="logout()">התנתק</a>
 </div>
 <span class="menu-separator"></span>
 <span class="menu-timedate">{{timedate.today | amDateFormat: 'YYYY MMMM DD'}}</span>

@@ -27,7 +27,8 @@ angular
     'ui.bootstrap.tabs',
     'template/tabs/tab.html',
     'template/tabs/tabset.html',
-    'angularMoment'
+    'angularMoment',
+    'ngAnimate-animate.css'
   ])
   .config(function ($stateProvider, $urlRouterProvider, $httpProvider, cfpLoadingBarProvider) {
 
@@ -66,6 +67,7 @@ angular
         // otherwise to login.
         controller: 'DashboardCtrl'
       })
+      // This state is created to load the common principal view views/dashboard/main.html.
       .state('main.dashboard', {
         abstract: true,
         // path: '/#/dashboard'
@@ -76,7 +78,7 @@ angular
         abstract: true,
         // path: '/#/dashboard/'
         url: '/',
-        // With params property is possible catch, child params.
+        // With params property is possible catch, child params in a parent state.
         params: {
           accountId: function($stateParams) {
             return $stateParams.accountId;

@@ -11,8 +11,9 @@ angular.module('negawattClientApp')
      * Reset category selection and back to the home.
      */
     $scope.reloadDashboard = function() {
+      $scope.ngAnimationPulse=!$scope.ngAnimationPulse;
       Category.clearSelectedCategory();
-      $state.go('dashboard.withAccount', {accountId: $stateParams.accountId});
+      $state.go('main.dashboard.map.account', {accountId: $stateParams.accountId});
     };
 
   });
