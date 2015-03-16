@@ -35,8 +35,8 @@ angular
     // fix router paths.
     $urlRouterProvider.when('/login/', '/login');
     $urlRouterProvider.when('/logout/', '/logout');
-    $urlRouterProvider.when('/dashboard/{accountId}', '/dashboard/{accountId}/');
-    $urlRouterProvider.when('/dashboard/{accountId:int}/category/{categoryId:int}', '/dashboard/{accountId:int}/category/{categoryId:int}/');
+    $urlRouterProvider.when('/dashboard/{accountId:[0-9]{1,}}', '/dashboard/{accountId:[0-9]{1,}}/');
+    $urlRouterProvider.when('/dashboard/{accountId:[0-9]{1,}}/category/{categoryId:[0-9]{1,}}', '/dashboard/{accountId:[0-9]{1,}}/category/{categoryId:[0-9]{1,}}/');
     $urlRouterProvider.when('', '/');
 
     // For any unmatched url, redirect to '/'.
@@ -82,8 +82,8 @@ angular
         url: '/',
         // With params property is possible catch, child params in a parent state.
         params: {
-          accountId: function($stateParams) {
-            console.log('main.dashboard.map', $stateParams.accountId);
+          accountId: function($stateParams, $urlMatcherFactory) {
+            debugger;
             return $stateParams.accountId;
           },
           categoryId: function($stateParams) {
@@ -115,7 +115,7 @@ angular
       })
       .state('main.dashboard.map.account', {
         // path: '/#/dashboard/[0-9]/' || '/#/dashboard/[0-9]/?chartFreq=2'
-        url: '{accountId:\'[0-9]{1,}\'}/?:chartFreq',
+        url: '{accountId:[0-9]{1,}}/?:chartFreq',
         params: {
           chartFreq: {
             // Keep monthly chart type by default.
@@ -163,7 +163,7 @@ angular
       })
       .state('main.dashboard.map.account.categories', {
         // path: '/#/dashboard/[0-9]/category/[0-9]/' || '/#/dashboard/[0-9]/category/[0-9]/?chartFreq=2'
-        url: 'category/{categoryId:int}/',
+        url: 'category/{categoryId:[0-9]{1,}}/',
         //resolve: {
         //  account: function(account, profile) {
         //    console.log('account profile: ', account, profile);
@@ -301,13 +301,7 @@ angular
     cfpLoadingBarProvider.latencyThreshold = 1000;
 
   })
-  .config(function($stateProvider) {
-
-    debugger;
-  })
   .run(function ($rootScope, $state, $stateParams, $log, Config, amMoment) {
-    console.log('run');
-    debugger;
     // MomentJS internationalization.
     amMoment.changeLocale('he');
 
