@@ -294,7 +294,13 @@ angular
     cfpLoadingBarProvider.latencyThreshold = 1000;
 
   })
+  .config(function($stateProvider) {
+
+    debugger;
+  })
   .run(function ($rootScope, $state, $stateParams, $log, Config, amMoment) {
+    console.log('run');
+    debugger;
     // MomentJS internationalization.
     amMoment.changeLocale('he');
 
