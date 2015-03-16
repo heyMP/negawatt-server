@@ -35,8 +35,8 @@ angular
     // fix router paths.
     $urlRouterProvider.when('/login/', '/login');
     $urlRouterProvider.when('/logout/', '/logout');
-    $urlRouterProvider.when('/dashboard/{accountId:[0-9]{1,}}', '/dashboard/{accountId:[0-9]{1,}}/');
-    $urlRouterProvider.when('/dashboard/{accountId:[0-9]{1,}}/category/{categoryId:[0-9]{1,}}', '/dashboard/{accountId:[0-9]{1,}}/category/{categoryId:[0-9]{1,}}/');
+    //$urlRouterProvider.when('/dashboard/{accountId:[0-9]{1,}}', '/dashboard/{accountId:[0-9]{1,}}/');
+    //$urlRouterProvider.when('/dashboard/{accountId:[0-9]{1,}}/category/{categoryId:[0-9]{1,}}', '/dashboard/{accountId:[0-9]{1,}}/category/{categoryId:[0-9]{1,}}/');
     $urlRouterProvider.when('', '/');
 
     // For any unmatched url, redirect to '/'.
@@ -82,12 +82,19 @@ angular
         url: '/',
         // With params property is possible catch, child params in a parent state.
         params: {
-          accountId: function($stateParams, $urlMatcherFactory) {
-            debugger;
-            return $stateParams.accountId;
+          accountId: {
+            value: function($stateParams, $urlMatcherFactory, $state) {
+              console.log($state.current.name, $stateParams, $state.params);
+              debugger;
+              return $stateParams.accountId;
+            },
+            squash: true
           },
-          categoryId: function($stateParams) {
-            return $stateParams.categoryId;
+          categoryId: {
+            value: function($stateParams) {
+              return $stateParams.categoryId;
+            },
+            squash: true
           }
         },
         resolve: {
@@ -115,7 +122,8 @@ angular
       })
       .state('main.dashboard.map.account', {
         // path: '/#/dashboard/[0-9]/' || '/#/dashboard/[0-9]/?chartFreq=2'
-        url: '{accountId:[0-9]{1,}}/?:chartFreq',
+        //url: '{accountId:[0-9]{1,}}/?:{chartFreq:int}',
+        url: ':accountId/?:{chartFreq:int}',
         params: {
           chartFreq: {
             // Keep monthly chart type by default.
@@ -163,7 +171,7 @@ angular
       })
       .state('main.dashboard.map.account.categories', {
         // path: '/#/dashboard/[0-9]/category/[0-9]/' || '/#/dashboard/[0-9]/category/[0-9]/?chartFreq=2'
-        url: 'category/{categoryId:[0-9]{1,}}/',
+        url: 'category/:categoryId/',
         //resolve: {
         //  account: function(account, profile) {
         //    console.log('account profile: ', account, profile);
