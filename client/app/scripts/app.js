@@ -30,7 +30,7 @@ angular
     'angularMoment',
     'ngAnimate-animate.css'
   ])
-  .config(function ($stateProvider, $urlRouterProvider, $httpProvider, cfpLoadingBarProvider) {
+  .config(function ($stateProvider, $urlRouterProvider, $httpProvider, cfpLoadingBarProvider, $urlMatcherFactoryProvider) {
 
     // fix router paths.
     $urlRouterProvider.when('/login/', '/login');
@@ -41,6 +41,22 @@ angular
 
     // For any unmatched url, redirect to '/'.
     $urlRouterProvider.otherwise('/');
+
+    // Define specific data type.
+    $urlMatcherFactoryProvider.type('AccountType', { pattern: /[0-9]+/ }, function() {
+      return {
+        encode: function(account) {
+          console.log(account);
+          return account
+        },
+        decode: function(accountIdStr) {
+          console.log(parseInt(accountIdStr));
+          return parseInt(accountIdStr);
+        },
+        is: function(val) { return val && angular.isNumber(val); }
+      };
+    });
+
 
     // Setup the states.
     $stateProvider
@@ -119,8 +135,13 @@ angular
       .state('main.dashboard.map.account', {
         // path: '/#/dashboard/[0-9]/' || '/#/dashboard/[0-9]/?chartFreq=2'
         //url: '{accountId:[0-9]{1,}}/?:{chartFreq:int}',
-        url: '{accountId:int}/?{chartFreq:int}',
+        //url: '{accountId:int}/?{chartFreq:int}',
+        //url: '{accountId:AccountType}/',
+        url: '{accountId:/[0-9]+/}/',
         params: {
+          accountId: {
+            dynamic: true
+          },
           chartFreq: {
             // Keep monthly chart type by default.
             value: 2
