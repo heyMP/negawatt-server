@@ -42,6 +42,22 @@ angular
     // For any unmatched url, redirect to '/'.
     $urlRouterProvider.otherwise('/');
 
+    // Define specific data type.
+    $urlMatcherFactoryProvider.type('AccountType', { pattern: /[0-9]+/ }, function() {
+      return {
+        encode: function(account) {
+          console.log(account);
+          return account
+        },
+        decode: function(accountIdStr) {
+          console.log(parseInt(accountIdStr));
+          return parseInt(accountIdStr);
+        },
+        is: function(val) { return val && angular.isNumber(val); }
+      };
+    });
+
+
     // Setup the states.
     $stateProvider
       .state('login', {
@@ -81,64 +97,73 @@ angular
         // path: '/#/dashboard/'
         url: '/',
         // With params property is possible catch, child params in a parent state.
+        params: {
+          accountId: {
+            value: function($stateParams, $urlMatcherFactory, $state) {
+              return $stateParams.accountId;
+            }
+          },
+          //categoryId: {
+          //  value: function($stateParams) {
+          //    return $stateParams.categoryId;
+          //  }
+          //}
+        },
         resolve: {
           account: function($stateParams, Profile, profile) {
             return Profile.selectAccount($stateParams.accountId, profile);
           },
-          meters: function(Meter, account, $stateParams, Category, $state) {
-
-            console.log('meters resolve main.dashboard.map', $stateParams, $state);
-            // Get first 100 records.
-            return Meter.get(account.id);
-          },
-          categories: function(Category, account) {
-            return Category.get(account.id);
-          },
+          meters: function() {
+            return {};
+          }
+          //meters: function(Meter, account, $stateParams, Category) {
+          //  console.log('meters resolve', $stateParams);
+          //  // Get first 100 records.
+          //  return Meter.get(account.id);
+          //},
+          //categories: function(Category, account) {
+          //  return Category.get(account.id);
+          //},
+          //messages: function(Message) {
+          //  return Message.get();
+          //}
         },
         views: {
           'map': {
             templateUrl: 'views/dashboard/main.map.html',
-            controller: 'MapCtrl'
+            controller: 'MapCtrl',
+            controllerAs: 'map'
           }
         }
       })
       .state('main.dashboard.map.account', {
         // path: '/#/dashboard/[0-9]/' || '/#/dashboard/[0-9]/?chartFreq=2'
-        url: '{accountId}/',
+        //url: '{accountId:[0-9]{1,}}/?:{chartFreq:int}',
+        //url: '{accountId:int}/?{chartFreq:int}',
+        //url: '{accountId:AccountType}/',
+        url: '{accountId:/[0-9]+/}',
         params: {
+          //accountId: {
+          //  dynamic: true
+          //},
           chartFreq: {
             // Keep monthly chart type by default.
             value: 2
           }
         },
-        resolve: {
-          meters: function(Meter, account, $stateParams, $state) {
-
-            console.log('meters resolve', $stateParams, $state);
-            // Get first 100 records.
-            return Meter.get(account.id);
-          },
-          categories: function(Category, account) {
-            return Category.get(account.id);
-          },
-          messages: function(Message) {
-            return Message.get();
-          }
-
-        },
-        //views: {
-        //  'menu@main.dashboard': {
-        //    templateUrl: 'views/dashboard/main.menu.html',
-        //    controller: 'MenuCtrl'
-        //  },
-        //  'categories@main.dashboard': {
-        //    templateUrl: 'views/dashboard/main.categories.html',
-        //    controller: 'CategoryCtrl'
-        //  },
-        //  'messages@main.dashboard': {
-        //    templateUrl: 'views/dashboard/main.messages.html',
-        //    controller: 'MessageCtrl'
-        //  }
+        views: {
+          //'menu@main.dashboard': {
+          //  templateUrl: 'views/dashboard/main.menu.html',
+          //  controller: 'MenuCtrl'
+          //},
+          //'categories@main.dashboard': {
+          //  templateUrl: 'views/dashboard/main.categories.html',
+          //  controller: 'CategoryCtrl'
+          //},
+          //'messages@main.dashboard': {
+          //  templateUrl: 'views/dashboard/main.messages.html',
+          //  controller: 'MessageCtrl'
+          //}
           //'details@dashboard': {
           //  templateUrl: 'views/dashboard/main.details.html',
           //  resolve: {
@@ -163,11 +188,11 @@ angular
           //  },
           //  controller: 'UsageCtrl'
           //}
-        //}
-      });
-      //.state('main.dashboard.map.account.categories', {
+        }
+      })
+      .state('main.dashboard.map.account.categories', {
         // path: '/#/dashboard/[0-9]/category/[0-9]/' || '/#/dashboard/[0-9]/category/[0-9]/?chartFreq=2'
-        //url: 'category/:categoryId/',
+        url: 'category/:categoryId/',
         //resolve: {
         //  account: function(account, profile) {
         //    console.log('account profile: ', account, profile);
@@ -228,7 +253,7 @@ angular
           //  controller: 'DetailsCtrl'
           //}
         //}
-      //});
+      });
       //.state('dashboard.account.markers', {
       //  url: '/marker/:markerId?categoryId',
       //  views: {

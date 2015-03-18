@@ -3,11 +3,25 @@
 angular.module('negawattClientApp')
   .controller('MapCtrl', function ($scope, $state, $stateParams, Category, ChartUsage, Map, leafletData, $timeout, account, meters) {
     console.log('MapCtrl::');
+    var self = this;
 
-    // Config map.
-    $scope.defaults = Map.getConfig();
-    $scope.center = Map.getCenter(account);
-    $scope.meters = meters;
+    console.log(this.defaults, this.center)
+
+    this.defaults = this.defaults || Map.getConfig();
+    this.center = this.center || {};
+
+    /**
+     * Return cordinate to center map.
+     *
+     * @returns {center|*}
+     */
+    this.config = function() {
+      // Define Default values.
+      self.defaults = Map.getConfig();
+      // Config map.
+      self.center = Map.getCenter(account);
+      self.meters = meters;
+    }
 
     // Hover above marker in the Map -  open tooltip.
     $scope.$on("leafletDirectiveMarker.mouseover", function(event, args) {
