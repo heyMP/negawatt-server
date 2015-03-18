@@ -2,7 +2,7 @@
 
 angular.module('negawattClientApp')
   .controller('DashboardCtrl', function ($state, $stateParams, profile) {
-    console.log('DashboardCtrl', profile.account);
+    console.log('DashboardCtrl', profile.account, $stateParams, $state);
     var defaultAccountId;
     if (profile) {
       // Apply only on the login wotkflow.

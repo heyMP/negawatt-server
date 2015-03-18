@@ -51,7 +51,7 @@ angular.module('negawattClientApp')
      * @param categoryId
      */
     $scope.select = function(categoryId) {
-      $state.forceGo('dashboard.withAccount.categories', {categoryId: categoryId});
+      $state.forceGo('main.dashboard.map.account.categories', {accountId: $scope.accountId, categoryId: categoryId});
     }
 
     /**
