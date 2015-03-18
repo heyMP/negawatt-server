@@ -54,20 +54,17 @@ angular
     // For any unmatched url, redirect to '/'.
     $urlRouterProvider.otherwise('/');
 
-    // Define specific data type.
-    $urlMatcherFactoryProvider.type('AccountType', { pattern: /[0-9]+/ }, function() {
-      return {
-        encode: function(account) {
-          console.log(account);
-          return account
-        },
-        decode: function(accountIdStr) {
-          console.log(parseInt(accountIdStr));
-          return parseInt(accountIdStr);
-        },
-        is: function(val) { return val && angular.isNumber(val); }
-      };
-    });
+    // Define common data type form params.
+    var numberType = {
+      type: {
+        decode: function(val) { return parseInt(val, 10); },
+        encode: function(val) { return val && val.toString(); },
+        equals: function(a, b) { return this.is(a) && a === b; },
+        is: function(val) { return angular.isNumber(val) && isFinite(val) && val % 1 === 0; },
+        name: 'number',
+          pattern: /\d+/
+      }
+    };
 
 
     // Setup the states.
@@ -108,28 +105,16 @@ angular
         abstract: true,
         // path: '/#/dashboard/'
         url: '/',
-        // With params property is possible catch, child params in a parent state.
+        // With params property is possible define data type and and catch child params in a parent state.
         params: {
-          accountId: {
-            type: {
-              decode: function(val) { return parseInt(val, 10); },
-              encode: function(val) { return val && val.toString(); },
-              equals: function(a, b) { return this.is(a) && a === b; },
-              is: function(val) { return angular.isNumber(val) && isFinite(val) && val % 1 === 0; },
-              pattern: /\d+/
-            }
-          }
-          //categoryId: {
-          //  value: function($stateParams) {
-          //    return $stateParams.categoryId;
-          //  }
-          //}
+          accountId: numberType,
+          categoryId: numberType
         },
         resolve: {
           account: function($stateParams, Profile, profile, $state) {
             console.log('accountId: ', this.params.accountId.type.name, typeof $stateParams.accountId, $stateParams.accountId, this);
-            debugger;
-            // return Profile.selectAccount($stateParams.accountId, profile);
+            console.log('categoryId: ', this.params.categoryId.type.name, typeof $stateParams.categoryId, $stateParams.categoryId, this);
+            return Profile.selectAccount($stateParams.accountId, profile);
           },
           meters: function() {
             return {};
