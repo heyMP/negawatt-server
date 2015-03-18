@@ -84,17 +84,13 @@ angular
         params: {
           accountId: {
             value: function($stateParams, $urlMatcherFactory, $state) {
-              console.log($stateParams, $state);
-              debugger;
-              return 9;
-            },
-            squash: false
+              return $stateParams.accountId;
+            }
           },
           categoryId: {
             value: function($stateParams) {
               return $stateParams.categoryId;
-            },
-            squash: false
+            }
           }
         },
         resolve: {
