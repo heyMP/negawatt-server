@@ -16,6 +16,7 @@ angular.module('negawattClientApp')
      * @returns {center|*}
      */
     this.config = function() {
+      console.log('MapCtrl::config');
       // Define Default values.
       self.defaults = Map.getConfig();
       // Config map.

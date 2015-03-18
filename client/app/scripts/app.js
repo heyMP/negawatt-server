@@ -105,6 +105,7 @@ angular
         abstract: true,
         // path: '/#/dashboard/'
         url: '/',
+        template: '<ui-view/>',
         // With params property is possible define data type and and catch child params in a parent state.
         params: {
           accountId: numberType,
@@ -116,20 +117,17 @@ angular
             console.log('categoryId: ', this.params.categoryId.type.name, typeof $stateParams.categoryId, $stateParams.categoryId, this);
             return Profile.selectAccount($stateParams.accountId, profile);
           },
-          meters: function() {
-            return {};
+          meters: function(Meter, account, $stateParams, Category) {
+            console.log('meters resolve', account.id);
+            // Get first 100 records.
+            return Meter.get(account.id);
+          },
+          categories: function(Category, account) {
+            return Category.get(account.id);
+          },
+          messages: function(Message) {
+            return Message.get();
           }
-          //meters: function(Meter, account, $stateParams, Category) {
-          //  console.log('meters resolve', $stateParams);
-          //  // Get first 100 records.
-          //  return Meter.get(account.id);
-          //},
-          //categories: function(Category, account) {
-          //  return Category.get(account.id);
-          //},
-          //messages: function(Message) {
-          //  return Message.get();
-          //}
         },
         views: {
           'map': {
@@ -140,11 +138,8 @@ angular
         }
       })
       .state('main.dashboard.map.account', {
-        // path: '/#/dashboard/[0-9]/' || '/#/dashboard/[0-9]/?chartFreq=2'
-        //url: '{accountId:[0-9]{1,}}/?:{chartFreq:int}',
-        //url: '{accountId:int}/?{chartFreq:int}',
-        //url: '{accountId:AccountType}/',
-        url: '{accountId:int}',
+        // path: '/#/dashboard/[0-9]/' || '/#/dashboard/[0-9]?chartFreq=2'
+        url: '{accountId:int}?{chartFreq:int}',
         params: {
           chartFreq: {
             // Keep monthly chart type by default.
@@ -152,18 +147,18 @@ angular
           }
         },
         views: {
-          //'menu@main.dashboard': {
-          //  templateUrl: 'views/dashboard/main.menu.html',
-          //  controller: 'MenuCtrl'
-          //},
-          //'categories@main.dashboard': {
-          //  templateUrl: 'views/dashboard/main.categories.html',
-          //  controller: 'CategoryCtrl'
-          //},
-          //'messages@main.dashboard': {
-          //  templateUrl: 'views/dashboard/main.messages.html',
-          //  controller: 'MessageCtrl'
-          //}
+          'menu@main.dashboard': {
+            templateUrl: 'views/dashboard/main.menu.html',
+            controller: 'MenuCtrl'
+          },
+          'categories@main.dashboard': {
+            templateUrl: 'views/dashboard/main.categories.html',
+            controller: 'CategoryCtrl'
+          },
+          'messages@main.dashboard': {
+            templateUrl: 'views/dashboard/main.messages.html',
+            controller: 'MessageCtrl'
+          }
           //'details@dashboard': {
           //  templateUrl: 'views/dashboard/main.details.html',
           //  resolve: {
