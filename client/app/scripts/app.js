@@ -84,9 +84,9 @@ angular
         params: {
           accountId: {
             value: function($stateParams, $urlMatcherFactory, $state) {
-              console.log($state.current.name, $stateParams, $state.params);
+              console.log($stateParams, $stateParams.accountId);
               debugger;
-              return $stateParams.accountId;
+              return 9;
             },
             squash: true
           },
@@ -123,7 +123,7 @@ angular
       .state('main.dashboard.map.account', {
         // path: '/#/dashboard/[0-9]/' || '/#/dashboard/[0-9]/?chartFreq=2'
         //url: '{accountId:[0-9]{1,}}/?:{chartFreq:int}',
-        url: ':accountId/?:{chartFreq:int}',
+        url: '{accountId}/?{chartFreq:int}',
         params: {
           chartFreq: {
             // Keep monthly chart type by default.
