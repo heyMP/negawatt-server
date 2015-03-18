@@ -39,7 +39,6 @@ angular
      *  The state service
      */
     function goMainState($state) {
-      console.log('main');
       $state.transitionTo('main', {}, {reload: true});
     }
 
@@ -112,10 +111,14 @@ angular
         // With params property is possible catch, child params in a parent state.
         params: {
           accountId: {
-            value: function($stateParams, $urlMatcherFactory, $state) {
-              return $stateParams.accountId;
+            type: {
+              decode: function(val) { return parseInt(val, 10); },
+              encode: function(val) { return val && val.toString(); },
+              equals: function(a, b) { return this.is(a) && a === b; },
+              is: function(val) { return angular.isNumber(val) && isFinite(val) && val % 1 === 0; },
+              pattern: /\d+/
             }
-          },
+          }
           //categoryId: {
           //  value: function($stateParams) {
           //    return $stateParams.categoryId;
@@ -123,8 +126,10 @@ angular
           //}
         },
         resolve: {
-          account: function($stateParams, Profile, profile) {
-            return Profile.selectAccount($stateParams.accountId, profile);
+          account: function($stateParams, Profile, profile, $state) {
+            console.log('accountId: ', this.params.accountId.type.name, typeof $stateParams.accountId, $stateParams.accountId, this);
+            debugger;
+            // return Profile.selectAccount($stateParams.accountId, profile);
           },
           meters: function() {
             return {};
@@ -154,11 +159,8 @@ angular
         //url: '{accountId:[0-9]{1,}}/?:{chartFreq:int}',
         //url: '{accountId:int}/?{chartFreq:int}',
         //url: '{accountId:AccountType}/',
-        url: '{accountId:/[0-9]+/}',
+        url: '{accountId:int}',
         params: {
-          //accountId: {
-          //  dynamic: true
-          //},
           chartFreq: {
             // Keep monthly chart type by default.
             value: 2
@@ -205,7 +207,7 @@ angular
       })
       .state('main.dashboard.map.account.categories', {
         // path: '/#/dashboard/[0-9]/category/[0-9]/' || '/#/dashboard/[0-9]/category/[0-9]/?chartFreq=2'
-        url: 'category/:categoryId/',
+        url: '/category/:categoryId',
         //resolve: {
         //  account: function(account, profile) {
         //    console.log('account profile: ', account, profile);
