@@ -32,11 +32,24 @@ angular
   ])
   .config(function ($stateProvider, $urlRouterProvider, $httpProvider, cfpLoadingBarProvider, $urlMatcherFactoryProvider) {
 
-    // fix router paths.
+    /**
+     * Reload from main state the site.
+     *
+     * @param $state
+     *  The state service
+     */
+    function goMainState($state) {
+      console.log('main');
+      $state.transitionTo('main', {}, {reload: true});
+    }
+
+    // Route paths not defined in the $stateProvider.
     $urlRouterProvider.when('/login/', '/login');
     $urlRouterProvider.when('/logout/', '/logout');
     //$urlRouterProvider.when('/dashboard/{accountId:[0-9]{1,}}', '/dashboard/{accountId:[0-9]{1,}}/');
     //$urlRouterProvider.when('/dashboard/{accountId:[0-9]{1,}}/category/{categoryId:[0-9]{1,}}', '/dashboard/{accountId:[0-9]{1,}}/category/{categoryId:[0-9]{1,}}/');
+    $urlRouterProvider.when('/dashboard', goMainState);
+    $urlRouterProvider.when('/dashboard/', goMainState);
     $urlRouterProvider.when('', '/');
 
     // For any unmatched url, redirect to '/'.
