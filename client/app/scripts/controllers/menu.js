@@ -13,7 +13,7 @@ angular.module('negawattClientApp')
     $scope.reloadDashboard = function() {
       $scope.ngAnimationPulse=!$scope.ngAnimationPulse;
       Category.clearSelectedCategory();
-      $state.go('main.dashboard.map.account', {accountId: $stateParams.accountId});
+      $state.forceGo('main.dashboard.map.account', {accountId: $stateParams.accountId});
     };
 
   });
