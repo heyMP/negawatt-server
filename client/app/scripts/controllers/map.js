@@ -97,4 +97,5 @@ angular.module('negawattClientApp')
       setSelectedMarker($stateParams.markerId);
     }
 
+
   });
