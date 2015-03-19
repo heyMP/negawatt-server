@@ -46,7 +46,7 @@ angular
     $urlRouterProvider.when('/login/', '/login');
     $urlRouterProvider.when('/logout/', '/logout');
     //$urlRouterProvider.when('/dashboard/{accountId:[0-9]{1,}}', '/dashboard/{accountId:[0-9]{1,}}/');
-    //$urlRouterProvider.when('/dashboard/{accountId:[0-9]{1,}}/category/{categoryId:[0-9]{1,}}', '/dashboard/{accountId:[0-9]{1,}}/category/{categoryId:[0-9]{1,}}/');
+    $urlRouterProvider.when('/dashboard/{accountId:int}/category/{categoryId:int}/', '/dashboard/{accountId:int}/category/{categoryId:int}');
     $urlRouterProvider.when('/dashboard', goMainState);
     $urlRouterProvider.when('/dashboard/', goMainState);
     $urlRouterProvider.when('', '/');
@@ -105,7 +105,6 @@ angular
         abstract: true,
         // path: '/#/dashboard/'
         url: '/',
-        template: '<ui-view/>',
         // With params property is possible define data type and and catch child params in a parent state.
         params: {
           accountId: numberType,
