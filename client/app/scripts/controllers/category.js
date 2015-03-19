@@ -8,7 +8,8 @@
  * Controller of the negawattClientApp
  */
 angular.module('negawattClientApp')
-  .controller('CategoryCtrl', function ($scope, $state, $stateParams, $filter, Category, Meter, categories, meters) {
+  .controller('CategoryCtrl', function ($rootScope, $scope, $state, $stateParams, $filter, Category, Meter, categories, meters, $timeout) {
+    console.log('CategoryCtrl::');
 
     // Define property in the parent scope, permit to be accesable
     // by scope methods of the controller.
@@ -19,7 +20,7 @@ angular.module('negawattClientApp')
     $scope.chartFreq = $stateParams.chartFreq;
 
     // Activate filter of meters only if we are in the principal state.
-    if ($state.is('dashboard.withAccount')) {
+    if ($state.is('main.dashboard.map.account')) {
       $scope.filterMeters = true;
     }
 
@@ -51,7 +52,11 @@ angular.module('negawattClientApp')
      * @param categoryId
      */
     $scope.select = function(categoryId) {
-      $state.forceGo('main.dashboard.map.account.categories', {categoryId: categoryId}, {inherit: true, notify: false});
+      $state.forceGo('main.dashboard.map.account.categories', {categoryId: categoryId}, {notify: true});
+      // Sync new category with $stateParams
+      $stateParams.categoryId = categoryId;
+
+      console.log($stateParams, categoryId);
     }
 
     /**

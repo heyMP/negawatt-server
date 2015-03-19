@@ -193,7 +193,13 @@ angular
         //    return account;
         //  }
         //}
-        //views: {
+        resolve: {
+          categories: function($stateParams, categories) {
+            console.log('categories::', $stateParams, categories);
+            return categories;
+          }
+        },
+        views: {
         //  // Replace `meters` data previous resolved, with the cached data
         //  // filtered by the selected category.
         //  '@main.dashboard': {
@@ -232,10 +238,10 @@ angular
           //  },
           //  controller: 'UsageCtrl'
           //},
-          //'categories@dashboard': {
-          //  templateUrl: 'views/dashboard/main.categories.html',
-          //  controller: 'CategoryCtrl'
-          //},
+          'categories': {
+            templateUrl: 'views/dashboard/main.categories.html',
+            controller: 'CategoryCtrl'
+          },
           //// Update details (pie) chart for categories.
           //'details@dashboard': {
           //  templateUrl: 'views/dashboard/main.details.html',
@@ -246,7 +252,7 @@ angular
           //  },
           //  controller: 'DetailsCtrl'
           //}
-        //}
+        }
       });
       //.state('dashboard.account.markers', {
       //  url: '/marker/:markerId?categoryId',
