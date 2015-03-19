@@ -9,7 +9,7 @@ angular.module('negawattClientApp')
     $scope.onSelect = function(selectedItem, chartData) {
       categoryId = ChartCategories.getCategoryIdSelected(selectedItem, chartData);
       if (angular.isDefined(categoryId)) {
-        $state.go('dashboard.withAccount.categories', {accountId: $stateParams.accountId, categoryId: categoryId});
+        $state.go('main.dashboard.map.account.categories', {accountId: $stateParams.accountId, categoryId: categoryId});
       }
     };
 
