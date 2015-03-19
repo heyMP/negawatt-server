@@ -81,6 +81,33 @@ angular
           $state.go('login');
         }
       })
+      .state('map', {
+        url: '/map',
+        templateUrl: 'views/map/map.html',
+        resolve: {
+          profile: function(Profile) {
+            return Profile.get();
+          },
+          account: function(profile, Profile, $stateParams) {
+            return Profile.selectAccount($stateParams.accountId, profile);
+          },
+          meters: function(Meter, account, $stateParams, Category) {
+            console.log('Meters resolving::', account);
+            // Get first 100 records.
+            return Meter.get(account.id);
+          }
+          //account: function($stateParams, Profile, profile, $state) {
+          //  console.log('accountId: ', this.params.accountId.type.name, typeof $stateParams.accountId, $stateParams.accountId, this);
+          //  console.log('categoryId: ', this.params.categoryId.type.name, typeof $stateParams.categoryId, $stateParams.categoryId, this);
+          //  return Profile.selectAccount($stateParams.accountId, profile);
+          //},
+        },
+        controller: 'MapCtrl',
+        controllerAs: 'map'
+      })
+      .state('map.controls', {
+        url: '/controls',
+      })
       .state('main', {
         // path: /#/
         url: '/',

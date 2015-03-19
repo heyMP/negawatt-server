@@ -5,11 +5,11 @@ angular.module('negawattClientApp')
     console.log('MapCtrl::');
     var self = this;
 
-    console.log(this.defaults, this.center)
 
     this.defaults = this.defaults || Map.getConfig();
     this.center = this.center || {};
 
+    console.log(this.defaults, this.center)
     /**
      * Return cordinate to center map.
      *
