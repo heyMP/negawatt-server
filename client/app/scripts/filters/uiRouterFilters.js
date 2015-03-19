@@ -11,7 +11,7 @@
 angular.module('negawattClientApp')
   .filter('includedByParams', function ($state, $stateParams) {
     var includesFilter = function (param, expression) {
-      debugger;
+      console.log(meters);
       return (angular.isDefined($stateParams[param]) && $stateParams[param] && +$stateParams[param] === expression);
     };
     return includesFilter;
