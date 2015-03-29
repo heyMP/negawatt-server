@@ -20,18 +20,38 @@ class NegawattFormatterMetersTotal extends \RestfulFormatterJson {
     // Let parent formatter prepare the output.
     $output = parent::prepare($data);
 
-    // Calculate total min/max timestamps for all the meters.
-    $min_ts = $data[0]['electricity_time_interval']->min;
-    $max_ts = $data[0]['electricity_time_interval']->max;
+    // Prepare a min/max query.
+    $request = $this->handler->getRequest();
+    $filter = $request['filter'];
+    unset($filter['has_electricity']);
 
-    foreach ($data as $row) {
-      $min_ts = min($min_ts ,$row['electricity_time_interval']->min);
-      $max_ts = max($max_ts ,$row['electricity_time_interval']->max);
+    $query = db_select('negawatt_electricity_normalized', 'e');
+
+    // Handle 'account' filter (if exists)
+    if (!empty($filter['account'])) {
+      // Add condition - the OG membership of the meter-node is equal to the
+      // account id in the request.
+      $query->join('node', 'n', 'n.nid = e.meter_nid');
+      $query->join('og_membership', 'og', 'og.etid = n.nid');
+      $query->condition('og.entity_type', 'node');
+      $query->condition('og.gid', $filter['account']);
+      unset($filter['account']);
     }
 
-    // Add total section to touput.
-    $output['total']['electricity_time_interval']['min'] = $min_ts;
-    $output['total']['electricity_time_interval']['max'] = $max_ts;
+    // Make sure we handled all the filter fields.
+    if (!empty($filter)) {
+      throw new \Exception('NegawattFormatterMetersTotal::prepare: Unknown fields in filter.');
+    }
+
+    // Add expressions for electricity min and max timestamps.
+    $query->addExpression('MIN(e.timestamp)', 'min');
+    $query->addExpression('MAX(e.timestamp)', 'max');
+
+    $minmax =  $query->execute()->fetchObject();
+
+    // Add total section to output.
+    $output['total']['electricity_time_interval']['min'] = $minmax->min;
+    $output['total']['electricity_time_interval']['max'] = $minmax->max;
 
     return $output;
   }
