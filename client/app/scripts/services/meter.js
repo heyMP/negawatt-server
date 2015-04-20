@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('negawattClientApp')
-  .service('Meter', function ($q, $http, $timeout, $filter, $state, $rootScope, Config, Marker, Utils) {
+  .service('Meter', function ($q, $http, $timeout, $rootScope, Config, Marker, Utils, MeterFilter) {
     var self = this;
 
     // A private cache key.
@@ -28,12 +28,12 @@ angular.module('negawattClientApp')
      *
      */
     this.get = function(accountId, categoryId) {
-      // We return the promise in progress, cache data or data from the server.
-      getMeters = $q.when(getMeters || angular.copy(cache.data) || getDataFromBackend(accountId));
+      // We return the promise in progress, cache data filtered or data from the server.
+      getMeters = $q.when(getMeters || metersFiltered() || getDataFromBackend(accountId));
 
       // Filtering in the case we have categoryId defined.
       if (angular.isDefined(categoryId)) {
-        getMeters = getMetersFilterByCategory(getMeters, categoryId);
+        MeterFilter.filters.category = categoryId;
       }
 
       // Clear the promise cached, after resolve or reject the promise. Permit access to the cache data, when
@@ -43,6 +43,14 @@ angular.module('negawattClientApp')
       });
 
       return getMeters;
+    };
+
+    /**
+     * Broadcast a notification of the meter data and it filters had changed.
+     */
+    this.refresh = function() {
+      // Broadcast and event to update the markers in the map.
+      $rootScope.$broadcast(broadcastUpdateEventName, metersFiltered());
     };
 
     /**
@@ -73,7 +81,9 @@ angular.module('negawattClientApp')
         transformResponse: prepareMetersForLeafletMarkers
       }).success(function(meters) {
         setCache(meters.data);
-        deferred.resolve(meters.data);
+
+        // Resolve with the meters filtered from cache.data.
+        deferred.resolve(metersFiltered());
 
         // Update with the rest of the markers.
         if (meters.hasNextPage) {
@@ -94,14 +104,25 @@ angular.module('negawattClientApp')
      *    The meter list.
      */
     function setCache(data) {
-      // Extend meters list.
-      cache = {
-        data: angular.extend(cache.data || {}, data),
-        timestamp: new Date()
-      };
+      if (angular.isUndefined(cache.data)) {
+        cache.data = {
+          // Save all the meters during the cache are avalible.
+          listAll: {},
+          // Keep the actual collection filtered, used to show into the map.
+          list: {},
+          // Interval information for electricity chart.
+          total: {}
+        };
+      }
+
+      // Extend meters properties explicit because we don have deep copy.
+      // TODO: from angular v1.4 use angular.merge().
+      angular.extend(cache.data.listAll, data.list);
+      angular.extend(cache.data.total, data.total);
+      cache.timestamp = new Date();
 
       // Broadcast and event to update the markers in the map.
-      $rootScope.$broadcast(broadcastUpdateEventName, cache.data);
+      $rootScope.$broadcast(broadcastUpdateEventName, metersFiltered());
 
       // Active the reset after update the cache.
       skipResetCache = false;
@@ -141,67 +162,49 @@ angular.module('negawattClientApp')
 
       // Save meters and the next request to get hasNextPage meters (if exist).
       meters = {
-        data: Utils.indexById(response.data),
+        data: {
+          list: Utils.indexById(response.data)
+        },
         hasNextPage: response.next || false
       };
 
-      angular.forEach(meters.data, function(item) {
-        meters.data[item.id] = item;
+      angular.forEach(meters.data.list, function(item) {
+        meters.data.list[item.id] = item;
 
         // Convert the geo location properties as expected by leaflet map.
         if (item.location) {
-          meters.data[item.id].lat = parseFloat(item.location.lat);
-          meters.data[item.id].lng = parseFloat(item.location.lng);
+          meters.data.list[item.id].lat = parseFloat(item.location.lat);
+          meters.data.list[item.id].lng = parseFloat(item.location.lng);
 
           delete item.location;
         }
 
         // Set meter tooltip
-        meters.data[item.id].message = item.place_description + '<br>' + item.place_address + '<br>' + item.place_locality;
+        meters.data.list[item.id].message = item.place_description + '<br>' + item.place_address + '<br>' + item.place_locality;
 
         // Extend meter with marker properties and methods.
-        angular.extend(meters.data[item.id], Marker);
+        angular.extend(meters.data.list[item.id], Marker);
 
         // Define default icon properties and methods, in order, to be changed later.
-        meters.data[item.id].unselect();
+        meters.data.list[item.id].unselect();
       });
+
+      // Add total property inside the meter data object, as private property.
+      meters.data.total = response.total;
 
       return meters;
     }
 
     /**
-     * Return a promise with the meter list, from cache or the server. Filter by a category.
+     * Return meters filter by the active filters.
      *
-     * @param getMeters - {$q.promise}
-     *    Promise with the list of meters.
-     *
-     * @param categoryId
-     *    The category ID.
-     *
-     * @returns {$q.promise}
-     *    Promise of a list of meters filter by category..
+     * @returns {*|cache.data|{list, total}}
      */
-    function getMetersFilterByCategory(getMeters, categoryId) {
-      var deferred = $q.defer();
-
-      // Filter meters with a category.
-      getMeters.then(function(meters) {
-        meters = Utils.indexById($filter('filter')(Utils.toArray(meters), function(meter) {
-
-          // Convert categories id to integer.
-          if (meter.meter_categories) {
-            meter.meter_categories = meter.meter_categories.map(function(item) { return parseInt(item)});
-          }
-
-          if (meter.meter_categories && meter.meter_categories.indexOf(parseInt(categoryId)) !== -1) {
-            return meter;
-          }
-        }, true));
-
-        deferred.resolve(meters);
-      });
-
-      return deferred.promise;
+    function metersFiltered() {
+      if (angular.isDefined(cache.data)) {
+        cache.data.list = MeterFilter.byCategory(cache.data);
+      }
+      return cache.data;
     }
 
     /**

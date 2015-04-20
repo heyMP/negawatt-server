@@ -53,7 +53,7 @@ angular.module('negawattClientApp')
      */
     this.get = function(accountId, categoryId) {
 
-      getCategories = $q.when(getCategories || angular.copy(cache.data) || getCategoriesFromServer(accountId));
+      getCategories = $q.when(getCategories || cache.data || getCategoriesFromServer(accountId));
 
       // Prepare the categories object.
       getCategories = prepareCategories(getCategories, accountId);
@@ -110,7 +110,7 @@ angular.module('negawattClientApp')
       // Filter meters with a category.
       getCategories.then(function getCategoriesFilterByCategoryResolve(categories) {
         // Necessary to separate the cache from the filtering.
-        categories = angular.copy(categories);
+        categories = categories;
         categories.collection = $filter('filter')(Utils.toArray(categories.collection), {id: parseInt(categoryId)}, true).pop().children;
         deferred.resolve(categories);
       });
@@ -157,7 +157,7 @@ angular.module('negawattClientApp')
 
       // Get all the meters.
       Meter.get(accountId).then(function(meters) {
-        self.meters = Utils.toArray(meters);
+        self.meters = Utils.toArray(meters.listAll);
         getCategories
           .then(addNumberOfMetersByCategory)
           .then(prepareData)
@@ -200,9 +200,9 @@ angular.module('negawattClientApp')
         });
 
       angular.forEach(metersCategories, function(categories) {
-        angular.forEach(categories, function(categoryId) {
+        angular.forEach(categories, function(category) {
           // Set selected categories.
-          var categoriesIds = [parseInt(categoryId)] ;
+          var categoriesIds = [+category.id] ;
 
           // Increase amount of meters.
           angular.forEach(categoriesIds, function(itemsId) {

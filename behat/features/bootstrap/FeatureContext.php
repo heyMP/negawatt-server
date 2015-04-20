@@ -37,7 +37,7 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
     $element = $this->getSession()->getPage();
     $element->fillField('username', $name);
     $element->fillField('password', $password);
-    $submit = $element->findButton('Log in');
+    $submit = $element->findButton('התחבר');
 
     if (empty($submit)) {
       throw new \Exception(sprintf("No submit button at %s", $this->getSession()->getCurrentUrl()));
@@ -113,13 +113,16 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
    * @Then I should see a marker selected
    */
   public function iShouldSeeAMarkerSelected() {
-    $selected_src_image = '../images/marker-red.png';
+    $selected_src_image = '-red.png';
     // check if exist and is selected.
     $this->waitFor(function($context) use ($selected_src_image) {
       try {
-        // Get an array of string <img src="...">, filled with the value of the src attribute of the marker icon image.
-        $marker_selected = $context->getSession()->evaluateScript('angular.element(".leaflet-marker-icon").map(function(index, element){ return angular.element(element).attr("src") }).toArray().indexOf("' . $selected_src_image . '");');
-        if ($marker_selected !== -1) {
+        // Get an array of string <img src="...">, filled with the value of the src attribute of the marker icon image and check id selected (if have ) '-red.png'.
+        $marker_selected = $context->getSession()->evaluateScript('angular.element(".leaflet-marker-icon").map(function(index, element){ return angular.element(element).attr("src").indexOf("' . $selected_src_image . '") }).toArray();');
+        // Reduce the array to empty or the position of the selected marker.
+        $result = max($marker_selected);
+
+        if ($result > 0) {
           return TRUE;
         }
         return FALSE;
@@ -155,8 +158,8 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
   public function iShouldSeeTheMonthlyKwsChartOfAllMeters() {
     // Testing the height of the first and last column, with the default chart size and data of the migration.
     $start_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(1) > td:nth-child(2)';
-    $end_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(9) > td:nth-child(2)';
-    $this->waitForTextNgElement($start_chart, '8787');
+    $end_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(24) > td:nth-child(2)';
+    $this->waitForTextNgElement($start_chart, '7836');
     $this->waitForTextNgElement($end_chart, '12318');
   }
 
@@ -165,9 +168,9 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
    */
   public function iShouldSeeThePreviousMonthlyKwsChartOfAllMeters() {
     $start_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(1) > td:nth-child(2)';
-    $end_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(3) > td:nth-child(2)';
-    $this->waitForTextNgElement($start_chart, '13111');
-    $this->waitForTextNgElement($end_chart, '12188');
+    $end_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(20) > td:nth-child(2)';
+    $this->waitForTextNgElement($start_chart, '7836');
+    $this->waitForTextNgElement($end_chart, '256');
   }
 
 
@@ -177,8 +180,8 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
   public function iShouldSeeTheMonthlyKwsChartAMeter() {
     // Testing the height of the first and last column, with the default chart size and data of the migration.
     $start_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(1) > td:nth-child(2)';
-    $end_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(9) > td:nth-child(2)';
-    $this->waitForTextNgElement($start_chart, '3081');
+    $end_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(12) > td:nth-child(2)';
+    $this->waitForTextNgElement($start_chart, '10936');
     $this->waitForTextNgElement($end_chart, '3606');
   }
 
@@ -242,11 +245,39 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
     $start_chart_meter2 = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(1) > td:nth-child(3)';
     $end_chart_meter2 = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(9) > td:nth-child(3)';
     // Meter 1.
-    $this->waitForTextNgElement($start_chart_meter1, '4941');
+    $this->waitForTextNgElement($start_chart_meter1, '7836');
     $this->waitForTextNgElement($end_chart_meter1, '827');
     // Meter 2.
     $this->waitForTextNgElement($start_chart_meter2, '3081');
     $this->waitForTextNgElement($end_chart_meter2, '3606');
+  }
+
+  /**
+   * @Then I should see a greeting as :greeting
+   */
+  public function iShouldSeeAsUsername($greeting) {
+    $css_path_greeting = '#dashboard-controls > ui-view > div.menu-account.ng-scope > span';
+    $this->waitForTextNgElement($css_path_greeting, $greeting);
+  }
+
+  /**
+   * @Then I should see logo account
+   */
+  public function iShouldSeeLogoAccount() {
+    $csspath = '#dashboard-controls > ui-view > div.menu-logo.ng-scope > img';
+    $logo_filename = 'logo.png';
+    $attr = 'src';
+    $this->waitForAttrNgElement($csspath, $attr, $logo_filename);
+  }
+
+  /**
+   * @Then I should see default profile image
+   */
+  public function iShouldSeeDefaultProfileImage() {
+    $csspath = '#dashboard-controls > ui-view > div.menu-account.ng-scope > img.menu-account-photo';
+    $img_filename = 'default_profile_white.png';
+    $attr = 'src';
+    $this->waitForAttrNgElement($csspath, $attr, $img_filename);
   }
 
   /**
@@ -421,7 +452,7 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
     $this->waitFor(function($context) use ($csspath, $attr, $value) {
       try {
         $element_attribute = $context->getSession()->evaluateScript('angular.element("' . $csspath . '").attr("' . $attr . '");');
-        if ($element_attribute !== NULL && $element_attribute == $value) {
+        if (strripos($element_attribute, $value) !== false) {
           return TRUE;
         }
         return FALSE;

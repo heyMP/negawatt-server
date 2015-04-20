@@ -1,12 +1,13 @@
 'use strict';
 
 angular.module('negawattClientApp')
-  .controller('MapCtrl', function ($scope, $state, $stateParams, Category, ChartUsage, Map, leafletData, $timeout,  account, meters) {
+  .controller('MapCtrl', function ($scope, $state, $stateParams, $location, Category, ChartUsage, Map, leafletData, $timeout, account, meters, MeterFilter) {
+    var isMeterSelected = false;
 
     // Config map.
     $scope.defaults = Map.getConfig();
     $scope.center = Map.getCenter(account);
-    $scope.meters = meters;
+    $scope.meters = meters.list;
 
     // Hover above marker in the Map -  open tooltip.
     $scope.$on("leafletDirectiveMarker.mouseover", function(event, args) {
@@ -44,12 +45,15 @@ angular.module('negawattClientApp')
 
     // Reload the current $state when meters added more.
     $scope.$on('nwMetersChanged', function(event, meters) {
-      $scope.meters = meters;
+      $scope.meters = meters.list;
+      if (MeterFilter.filters.meter && $scope.meters[MeterFilter.filters.meter] && !isMeterSelected) {
+        setSelectedMarker(MeterFilter.filters.meter);
+      }
     });
 
     // Select marker in the Map.
     $scope.$on('leafletDirectiveMarker.click', function(event, args) {
-      $state.forceGo('dashboard.withAccount.markers', {markerId: args.markerName, categoryId: Category.getSelectedCategory(), });
+      $state.forceGo('dashboard.withAccount.markers', {markerId: args.modelName, categoryId: Category.getSelectedCategory()} );
     });
 
     /**
@@ -71,13 +75,14 @@ angular.module('negawattClientApp')
         if (angular.isDefined($scope.meters[id])) {
           $scope.meters[id].select();
           Map.setMarkerSelected(id);
+          isMeterSelected = true;
         }
       });
-
     }
 
+
     if ($stateParams.markerId) {
-      setSelectedMarker($stateParams.markerId);
+      isMeterSelected = setSelectedMarker($stateParams.markerId);
     }
 
   });

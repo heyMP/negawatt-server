@@ -8,85 +8,55 @@
  * Controller of the negawattClientApp
  */
 angular.module('negawattClientApp')
-  .controller('UsageCtrl', function ($scope, $q, $location, $state, $stateParams, $urlRouter, account, usage, meters, ChartUsage) {
+  .controller('UsageCtrl', function ($scope, $q, $location, $state, $stateParams, $urlRouter, ChartUsage, UsagePeriod, limits, account, usage, meters) {
     var chartUpdated;
-    // Get data from the cache, since 'usage' might not be up to date
-    // after lazy-load.
+    // The initialization in a empty object is need it to avoid an error in the initial rendering.
+    $scope.usageChartData = {};
+
+    // Get chart frequencies.
     $scope.frequencies = ChartUsage.getFrequencies();
 
-    var chart = ChartUsage.get(account.id, $stateParams, meters);
-    // Revolve promise
+    // Set period limits, according the state.
+    UsagePeriod.setLimits(limits);
+
+    // Get data from the cache, since 'usage' might not be up to date
+    // after lazy-load.
+    var chart = ChartUsage.get(account.id, $stateParams, meters.list, UsagePeriod.getPeriod());
     chart.then(function(response) {
       $scope.usageChartData = $scope.usageChartData || response;
       chart = undefined;
     });
 
-
-    /**
-     * Get electricity data in the new chart frequency.
-     */
-    $scope.changeFrequency = function() {
-      var params = {};
-
-      // Change of frequency, request the new electricity data on the selected frequency and prepare
-      // the query string to be updated..
-      if ( this.frequencies && ($stateParams.chartFreq !== this.frequencies[this.$index].type) ) {
-        $stateParams.chartFreq = this.frequencies[this.$index].type;
-        // Delete properties in the case we change the frecuency (day, month, year).
-        if (chartUpdated) {
-          delete $stateParams['chartNextPeriod'];
-          delete $stateParams['chartPreviousPeriod'];
-        }
-      }
-
-      // Query string params.
-      angular.extend(params, {
-        chartFreq: $stateParams.chartFreq
-      })
-
-      // Udpate chart.
-      updateUsageChart(params);
+    // Get the parameters chart frecuency.
+    if (angular.isDefined($stateParams.chartFreq)) {
+      setActiveFrequencyTab($scope.frequencies[$stateParams.chartFreq-1]);
     }
 
-    /**
-     * Get electricity data for the new period into the chart frequency.
-     */
-    $scope.changePeriod = function(period) {
-      var params = {};
+    // Get from parameters information of the selected marker.
+    if (angular.isDefined($stateParams.markerId)) {
+      // Share meter selected.
+      $scope.meterSelected = meters.list[$stateParams.markerId];
 
-      // Query string params.
-      angular.extend(params, {
-        chartFreq: $stateParams.chartFreq,
-        chartNextPeriod: $stateParams.chartNextPeriod || period.next,
-        chartPreviousPeriod: $stateParams.chartPreviousPeriod || period.previous
-      })
-
-      // Udpate chart.
-      updateUsageChart(params, period);
+      // Chart usage information of the selected marker.
+      ChartUsage.meterSelected(meters.list[$stateParams.markerId]);
     }
 
-    // Handle lazy-load of electricity data.
-    // When cache expands, update the chart.
-    $scope.$on("nwElectricityChanged", function(event, filtersHash) {
-
-      // Don't update usageChartData if we're not in the active request.
-      if (filtersHash != ChartUsage.getActiveRequestHash()) {
-        return;
-      }
-
-      // Update data in the chart.
-      ChartUsage.getByFiltersHash(filtersHash).then(function(response) {
-        $scope.usageChartData = response;
-      });
-    });
 
     // Active the seleced chart frequency.
     function setActiveFrequencyTab(frequency) {
       frequency.active = true;
     }
 
-    if (angular.isDefined($stateParams.chartFreq)) {
-      setActiveFrequencyTab($scope.frequencies[$stateParams.chartFreq-1])
+    /**
+     * Keep parameters syncronization between url and router.
+     *
+     * @param params
+     *  Parameters of the current search.
+     */
+    function syncUrl(params) {
+      $location.search(params);
+      $urlRouter.update(true);
+      chartUpdated = true;
     }
 
     /**
@@ -114,25 +84,79 @@ angular.module('negawattClientApp')
       // Load electricity data in the chart according the chart frequency.
       $scope.isLoading = true;
 
-      ChartUsage.get(account.id, $stateParams, meters, period).then(function(response) {
+      // Extend period with the maximum and minimum time, if a marker is selected.
+      if (angular.isDefined($stateParams.markerId)) {
+        period = angular.extend(period || {}, meters.list[$stateParams.markerId] && meters.list[$stateParams.markerId].electricity_time_interval);
+      }
+
+      ChartUsage.get(account.id, $stateParams, meters.list, period).then(function(response) {
         $scope.usageChartData = response;
         $scope.isLoading = false;
       });
 
-      // Keep parameters syncronization between url and router.
-      $location.search(params);
-      $urlRouter.update(true);
-      chartUpdated = true;
+      syncUrl(params);
     }
 
-    // Detail information of the selected marker.
-    if (angular.isDefined($stateParams.markerId)) {
-      // Share meter selected.
-      $scope.meterSelected = meters[$stateParams.markerId];
+    /**
+     * Get electricity data in the new chart frequency.
+     */
+    $scope.changeFrequency = function() {
+      var params = {};
 
-      // Chart usage information of the selected marker.
-      ChartUsage.meterSelected(meters[$stateParams.markerId]);
+      // Change of frequency, request the new electricity data on the selected frequency and prepare
+      // the query string to be updated..
+      if ( this.frequencies && ($stateParams.chartFreq !== this.frequencies[this.$index].type) ) {
+        $stateParams.chartFreq = this.frequencies[this.$index].type;
+        // Delete properties in the case we change the frecuency (day, month, year).
+        if (chartUpdated) {
+          delete $stateParams['chartNextPeriod'];
+          delete $stateParams['chartPreviousPeriod'];
+        }
+      }
+
+      // Query string params.
+      angular.extend(params, $location.search(), {
+        chartFreq: $stateParams.chartFreq
+      });
+
+      // Udpate chart.
+      updateUsageChart(params);
     }
+
+    /**
+     * Get electricity data for the new period into the chart frequency.
+     *
+     * @param period
+     *  The period to next ot previous to do the new request.
+     */
+    $scope.changePeriod = function(period) {
+      var params = {};
+
+      // Query string params.
+      angular.extend(params, {
+        chartFreq: $stateParams.chartFreq,
+        chartNextPeriod: period.next,
+        chartPreviousPeriod: period.previous
+      })
+
+      // Udpate chart.
+      updateUsageChart(params, period);
+    }
+
+    // Handle lazy-load of electricity data.
+    // When cache expands, update the chart.
+    $scope.$on("nwElectricityChanged", function(event, filtersHash) {
+
+      // Don't update usageChartData if we're not in the active request.
+      if (filtersHash != ChartUsage.getActiveRequestHash()) {
+        return;
+      }
+
+      // Update data in the chart.
+      ChartUsage.getByFiltersHash(filtersHash).then(function(response) {
+        $scope.usageChartData = response;
+      });
+    });
 
 
   });

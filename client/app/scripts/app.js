@@ -27,12 +27,21 @@ angular
     'ui.bootstrap.tabs',
     'template/tabs/tab.html',
     'template/tabs/tabset.html',
-    'angularMoment',
-    'angular-nw-weather'
+    'angularMoment'
   ])
   .config(function ($stateProvider, $urlRouterProvider, $httpProvider, cfpLoadingBarProvider) {
+    // Handle state 'dashboard' activation via browser url '/'
+    $urlRouterProvider.when('', '/');
+    $urlRouterProvider.when('/', function($injector, $location, $state, Profile) {
+      Profile.get().then(function(profile) {
+        if (profile) {
+          $state.go('dashboard.withAccount', {accountId: profile.account[0].id});
+        }
+      });
+    });
+
     // For any unmatched url, redirect to '/'.
-    $urlRouterProvider.otherwise('/');
+    $urlRouterProvider.otherwise('');
 
     // Setup the states.
     $stateProvider
@@ -49,7 +58,8 @@ angular
         }
       })
       .state('dashboard', {
-        url: '/',
+        abstract: true,
+        url: '/dashboard',
         templateUrl: 'views/dashboard/main.html',
         resolve: {
           profile: function(Profile) {
@@ -59,7 +69,7 @@ angular
         controller: 'DashboardCtrl'
       })
       .state('dashboard.withAccount', {
-        url: 'dashboard/{accountId:int}?{chartFreq:int}&{chartNextPeriod:int}&{chartPreviousPeriod:int}',
+        url: '/{accountId:int}?{chartFreq:int}&{chartNextPeriod:int}&{chartPreviousPeriod:int}',
         reloadOnSearch: false,
         params: {
           chartFreq: {
@@ -71,8 +81,8 @@ angular
           account: function($stateParams, Profile, profile) {
             return Profile.selectAccount($stateParams.accountId, profile);
           },
-          meters: function(Meter, account, $stateParams, Category) {
-            // Get first 100 records.
+          meters: function(Meter, account, $stateParams, Category, MeterFilter) {
+            // Get first records.
             return Meter.get(account.id);
           },
           categories: function(Category, account) {
@@ -80,6 +90,10 @@ angular
           },
           messages: function(Message) {
             return Message.get();
+          },
+          // We inject meters to be sure the cache in Meter object was filled.
+          limits: function(meters) {
+            return meters.total.electricity_time_interval;
           }
         },
         views: {
@@ -115,7 +129,7 @@ angular
               usage: function(ChartUsage, $state, $stateParams, account, meters) {
                 // Perform the GET only if we're in the proper (parent) state.
                 if ($state.current.name == 'dashboard.withAccount') {
-                  return ChartUsage.get(account.id, $stateParams, meters);
+                  return ChartUsage.get(account.id, $stateParams, meters.list);
                 } else {
                   return {};
                 }
@@ -128,25 +142,41 @@ angular
       .state('dashboard.withAccount.categories', {
         url: '/category/{categoryId:int}',
         reloadOnSearch: false,
+        resolve: {
+          meters: function(Meter, $stateParams, account, MeterFilter) {
+            MeterFilter.filters.category = +$stateParams.categoryId;
+            return Meter.get(account.id, $stateParams.categoryId);
+          },
+          categories: function(Category, account, categories) {
+            return Category.get(account.id);
+          }
+        },
         views: {
           // Replace `meters` data previous resolved, with the cached data
           // filtered by the selected category.
           'map@dashboard': {
             templateUrl: 'views/dashboard/main.map.html',
-            resolve: {
-              meters: function(Meter, $stateParams, account) {
-                return Meter.get(account.id, $stateParams.categoryId);
-              }
-            },
             controller: 'MapCtrl'
           },
           // Update usage-chart to show category summary.
           'usage@dashboard': {
             templateUrl: 'views/dashboard/main.usage.html',
             resolve: {
+              // Insert the limits to the chart.
+              limits: function(categories, $stateParams) {
+                var interval = categories.collection[$stateParams.categoryId].electricity_time_interval;
+
+                return {
+                  max: interval && interval.max || {},
+                  min: interval && interval.min || {}
+                }
+              },
               // Get electricity data and transform it into chart format.
-              usage: function(ChartUsage, $stateParams, account, meters) {
-                return ChartUsage.get(account.id, $stateParams, meters);
+              usage: function(ChartUsage, $stateParams, account, meters, UsagePeriod, limits) {
+                // Set period limits, according the state.
+                UsagePeriod.setLimits(limits);
+
+                return ChartUsage.get(account.id, $stateParams, meters.list, UsagePeriod.getPeriod());
               }
             },
             controller: 'UsageCtrl'
@@ -170,17 +200,22 @@ angular
       .state('dashboard.withAccount.markers', {
         url: '/marker/:markerId?categoryId',
         reloadOnSearch: false,
+        resolve: {
+          meters: function(Meter, $stateParams, account, MeterFilter) {
+            MeterFilter.filters.category = +$stateParams.categoryId;
+            MeterFilter.filters.meter = +$stateParams.markerId;
+            // Necessary to resolve again to apply the filter, of category id.
+            return Meter.get(account.id, $stateParams.categoryId);
+          },
+          categories: function(Category, account, categories) {
+            return Category.get(account.id);
+          }
+        },
         views: {
           // Replace `meters` data previous resolved, with the cached data
           // if is the case filtered by the selected category.
           'map@dashboard': {
             templateUrl: 'views/dashboard/main.map.html',
-            resolve: {
-              meters: function(Meter, $stateParams, account) {
-                // Necessary to resolve again to apply the filter, of category id.
-                return Meter.get(account.id, $stateParams.categoryId);
-              }
-            },
             controller: 'MapCtrl'
           },
           'categories@dashboard': {
@@ -201,9 +236,21 @@ angular
           'usage@dashboard': {
             templateUrl: 'views/dashboard/main.usage.html',
             resolve: {
+              // Insert the limits to the chart.
+              limits: function(meters, $stateParams) {
+                var interval = meters.list[$stateParams.markerId] && meters.list[$stateParams.markerId].electricity_time_interval;
+
+                return {
+                  max: interval && interval.max || {},
+                  min: interval && interval.min || {}
+                };
+              },
               // Get electricity data and transform it into chart format.
-              usage: function(ChartUsage, $stateParams, account, meters) {
-                return ChartUsage.get(account.id, $stateParams, meters);
+              usage: function(ChartUsage, $stateParams, account, meters, UsagePeriod, limits) {
+                // Set period limits, according the state.
+                UsagePeriod.setLimits(limits);
+
+                return ChartUsage.get(account.id, $stateParams, meters.list, UsagePeriod.getPeriod());
               }
             },
             controller: 'UsageCtrl'
@@ -215,10 +262,10 @@ angular
     $httpProvider.interceptors.push(function ($q, Auth, $location, localStorageService) {
       return {
         'request': function (config) {
-          if (!config.withoutToken) {
-            config.headers = {
+          if (!config.withoutToken && !config.url.match(/.html/)) {
+            angular.extend(config.headers, {
               'access-token': localStorageService.get('access_token')
-            };
+            });
           }
           return config;
         },
