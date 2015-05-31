@@ -50,6 +50,21 @@ projects[flag][version] = "2.2"
 projects[geolocation][subdir] = "contrib"
 projects[geolocation][version] = "1.6"
 
+projects[imagemagick][subdir] = "contrib"
+projects[imagemagick][version] = "1.0"
+;projects[imagemagick][download][type] = "file"
+;projects[imagemagick][download][url] = "http://ftp.drupal.org/files/projects/imagemagick-7.x-1.0.zip"
+;projects[imagemagick][subdir] = "contrib"
+;projects[imagemagick][type] = "module"
+
+;projects[imagemagick][subdir] = "contrib"
+;projects[imagemagick][type] = "module"
+;projects[imagemagick][download][type] = "git"
+;projects[imagemagick][download][url]="http://git.drupal.org/project/feeds_tamper.git"
+
+projects[imagecache_actions][subdir] = "contrib"
+projects[imagecache_actions][version] = "1.5"
+
 projects[jquery_update][subdir] = "contrib"
 projects[jquery_update][version] = "2.4"
 
