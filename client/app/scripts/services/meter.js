@@ -71,7 +71,7 @@ angular.module('negawattClientApp')
       // Define endpoint with filters.
       // Get only meters that has electricity data.
       url = Config.backend + '/api/meters?'
-        + 'filter[has_electricity]=1'
+//        + 'filter[has_electricity]=1'
         + '&filter[account]=' + accountId
         + '&page=' + pageNumber;
 
