@@ -154,7 +154,7 @@ class NegawattEntityMeterBase extends \NegawattEntityBaseNode {
     }
 
     $uri = $value[0]['uri'];
-    $thumb_url = image_style_url('thumbnail', $uri);
+    $thumb_url = image_style_url('thumbnail_rotate', $uri);
 
     return array('url' => $thumb_url);
   }
