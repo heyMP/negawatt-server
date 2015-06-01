@@ -104,10 +104,14 @@ function negawatt_meter_node_presave($node) {
     }
   }
 
+  // If address field was changed, try geocoding by the address. However, don't
+  // try to geocode if location was already set by image EXIF above.
+  
   // Check if address field was changed.
-  if (!empty($node->is_new) ||
+  if ((!empty($node->is_new) ||
     $wrapper->field_place_address->value() != $wrapper_original->field_place_address->value() ||
-    $wrapper->field_place_locality->value() != $wrapper_original->field_place_locality->value()) {
+    $wrapper->field_place_locality->value() != $wrapper_original->field_place_locality->value())
+    && !$location_changed) {
 
     // Prepare geocoder as static.
     $adapter  = &drupal_static(__FUNCTION__ . '_adapter', NULL);
