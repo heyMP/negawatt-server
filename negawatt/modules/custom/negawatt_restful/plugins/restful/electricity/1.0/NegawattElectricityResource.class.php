@@ -205,7 +205,7 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
     // Add expressions for electricity total.
     $query->addExpression('SUM(negawatt_electricity_normalized.sum_kwh)', 'sum');
 
-    return $query;//->execute()->fetchAll();
+    return $query->execute();
   }
 
   /**
@@ -293,8 +293,8 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
 
     // Pass info to the formatter
     $this->valueMetadata['electricity']['summary']['timestamp'] = array(
-      'min' => $result->min_ts,
-      'max' => $result->max_ts,
+      'min' => $result[0]->min_ts,
+      'max' => $result[0]->max_ts,
     );
   }
 
