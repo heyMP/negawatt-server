@@ -155,21 +155,19 @@ function negawatt_meter_node_presave($node) {
       }
     }
 
-    if (!$success) {
-      return;
-    }
-
-    // Set location field, only if geolocation succeeded.
     $lat = $geocode->getLatitude();
     $lng = $geocode->getLongitude();
     // Mark to recalculate location field.
     $location_changed = TRUE;
 
-    $wrapper->field_address->set(array(
-      'thoroughfare' => $street_addr,
-      'locality' => $city,
-      'country' => $geocode->getCountryCode(),
-    ));
+    // Set location field, only if geolocation succeeded.
+    if (!$success) {
+      $wrapper->field_address->set(array(
+        'thoroughfare' => $street_addr,
+        'locality' => $city,
+        'country' => $geocode->getCountryCode(),
+      ));
+    }
   }
 
   if ($location_changed) {
