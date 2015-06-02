@@ -146,7 +146,7 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
       // Sub categories were found, show division by sub categories.
       $result_type = 'category';
 
-      // Build an mapping array: cat_id => array(all child cat ids);
+      // Build a mapping array: cat_id => array(all child cat ids);
       $child_cat_mapping = array();
       foreach ($taxonomy_array as $term) {
         if ($term->depth == 0) {
@@ -172,8 +172,11 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
         return $term->tid;
       }, $taxonomy_array);
       // Modify the query to sum electricity in each of the sub categories.
-      $query->join('field_data_og_vocabulary', 'cat', 'cat.entity_id = negawatt_electricity_normalized.meter_nid');
-      $query->condition('cat.og_vocabulary_target_id', $child_categories, 'IN');
+      // If parent category is 0 (that is, root category), there's no need to
+      // add 'IN' condition for categories - just grab all of them.
+      if ($parent_category != 0) {
+        $query->condition('cat.og_vocabulary_target_id', $child_categories, 'IN');
+      }
       $query->join('taxonomy_term_data', 'tax', 'tax.tid = cat.og_vocabulary_target_id');
       $query->fields('tax', array('tid', 'name'));
       $query->groupBy('cat.og_vocabulary_target_id');
@@ -198,7 +201,6 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
     $query->addExpression('SUM(negawatt_electricity_normalized.sum_kwh)', 'sum');
 
     return $query->execute();
-
   }
 
   /**
