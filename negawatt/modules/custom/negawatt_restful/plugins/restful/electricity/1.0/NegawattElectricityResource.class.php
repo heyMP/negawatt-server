@@ -200,7 +200,11 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
     // Add expressions for electricity total.
     $query->addExpression('SUM(negawatt_electricity_normalized.sum_kwh)', 'sum');
 
-    return $query->execute();
+    // Add min/max timestamp expressions.
+    $query->addExpression('MIN(timestamp)', 'min_ts');
+    $query->addExpression('MAX(timestamp)', 'max_ts');
+
+    return $query->execute()->fetchAll();
   }
 
   /**
@@ -211,18 +215,19 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
    * @return array
    *  min and max timestamps
    */
-  protected function queryForMinMaxTimestamp($query) {
-    // Use a copy of the query.
-    $min_max_query = clone $query;
-    // Remove 'group by' from query
-    $min_max_query->group = array();
-    // Add min/max expressions.
-    $min_max_query->addExpression('MIN(timestamp)', 'min');
-    $min_max_query->addExpression('MAX(timestamp)', 'max');
+  protected function calcMinMaxTimestamp($result) {
+    $min = PHP_INT_MAX;
+    $max = 0;
 
-    $result = $min_max_query->execute()->fetchAssoc();
-
-    return $result;
+    foreach ($result as $row) {
+      $min = min($min, $row->min_ts);
+      $max = max($max, $row->max_ts);
+    }
+    
+    return array(
+      'min' => $min,
+      'max' => $max,
+    );
   }
 
   /**
@@ -322,8 +327,8 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
     $child_cat_mapping = $cat_result['child_cat_mapping'];
 
     // Finish query and get result.
-    $min_max_ts = $this->queryForMinMaxTimestamp($query);
     $result = $this->queryForSummary($query);
+    $min_max_ts = $this->calcMinMaxTimestamp($result);
 
     if ($result_type == 'meter') {
       // Prepare the total section of the summary, for 'meters' result type.
