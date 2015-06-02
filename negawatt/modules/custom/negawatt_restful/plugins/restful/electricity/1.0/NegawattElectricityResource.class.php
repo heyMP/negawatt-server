@@ -204,6 +204,28 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
   }
 
   /**
+   * Get min and max timestamp for electricity query.
+   *
+   * @param $query
+   *
+   * @return array
+   *  min and max timestamps
+   */
+  protected function queryForMinMaxTimestamp($query) {
+    // Use a copy of the query.
+    $min_max_query = clone $query;
+    // Remove 'group by' from query
+    $min_max_query->group = array();
+    // Add min/max expressions.
+    $min_max_query->addExpression('MIN(timestamp)', 'min');
+    $min_max_query->addExpression('MAX(timestamp)', 'max');
+
+    $result = $min_max_query->execute()->fetchAssoc();
+
+    return $result;
+  }
+
+  /**
    * Return the total section of the summary, for 'meters' result type.
    *
    * @param $result
@@ -300,6 +322,7 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
     $child_cat_mapping = $cat_result['child_cat_mapping'];
 
     // Finish query and get result.
+    $min_max_ts = $this->queryForMinMaxTimestamp($query);
     $result = $this->queryForSummary($query);
 
     if ($result_type == 'meter') {
@@ -314,6 +337,7 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
     // Fill the total section to be output by the formatter.
     $summary['type'] = $result_type;
     $summary['values'] = $total;
+    $summary['min_max_timestamp'] = $min_max_ts;
 
     // Pass info to the formatter
     $this->valueMetadata['electricity']['summary'] = $summary;
