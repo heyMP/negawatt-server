@@ -209,44 +209,15 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
   }
 
   /**
-   * Get min and max timestamp for electricity query.
+   * A modified copy of RestfulDataProviderDbQuery::queryForListFilter()
+   *
+   * Add filters from http request to the query. However, skip filter for
+   * timestamp, since we don't want to limit the time range of the query.
    *
    * @param $query
-   *
-   * @return array
-   *  min and max timestamps
+   *    The query to modify.
    */
-  protected function queryForMinMaxTimestamp($original_query) {
-    $query = clone $original_query;
-
-    // Prepare query for min/max timestamp calculation.
-
-    // Clear group by clause.
-    $fields =& $query->getGroupBy();
-    $fields = array();
-
-    $conditions =& $query->conditions();
-    unset($conditions[2]);
-    $query->condition('timestamp', 0, '>');
-
-    // Add min/max timestamp expressions.
-    $query->addExpression('MIN(timestamp)', 'min_ts');
-    $query->addExpression('MAX(timestamp)', 'max_ts');
-
-    $result = $query->execute()->fetchAll();
-
-    return $result;
-    return array(
-      'min' => $min,
-      'max' => $max,
-    );
-  }
-  protected function calcMinMaxTimestamp() {
-    // Load query and apply filter options.
-    $query = parent::getQuery();
-//    $this->queryForListFilter($query);
-
-    // ************* queryForListFilter BEGIN
+  protected function queryForListFilterNoTimestamp($query) {
     $public_fields = $this->getPublicFields();
     foreach ($this->parseRequestForListFilter() as $filter) {
       // Skip timestamp filter
@@ -265,7 +236,23 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
       }
       $query->condition($condition);
     }
-    // ************* queryForListFilter END
+  }
+
+  /**
+   * Calculate min and max timestamp for electricity query.
+   *
+   * Build a query with all the filters and joins, like in prepareSummary().
+   * Add calculation of the min and max timestamp of electricity data for the
+   * account and frequency.
+   *
+   * @return array
+   *  min and max timestamps for electricity.
+   */
+  protected function calcMinMaxTimestamp() {
+    // Load query and apply filter options.
+    $query = parent::getQuery();
+    // Add request filters to query, but not timestamp filter.
+    $this->queryForListFilterNoTimestamp($query);
 
     $request = $this->getRequest();
     $filter = !empty($request['filter']) ? $request['filter'] : array();
@@ -291,8 +278,8 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
     // Finish query and get result.
     $result = $query->execute()->fetchAll();
 
-    // Pass info to the formatter
-    $this->valueMetadata['electricity']['summary']['timestamp'] = array(
+    // Return info to be passed to the formatter.
+    return array(
       'min' => $result[0]->min_ts,
       'max' => $result[0]->max_ts,
     );
@@ -411,12 +398,11 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
     // Fill the total section to be output by the formatter.
     $summary['type'] = $result_type;
     $summary['values'] = $total;
-//    $summary['min_max_timestamp'] = $min_max_ts;
+    // Add min and max timestamps for the account and frequency given.
+    $summary['timestamp'] = $this->calcMinMaxTimestamp();
 
     // Pass info to the formatter
     $this->valueMetadata['electricity']['summary'] = $summary;
-
-    $this->calcMinMaxTimestamp();
   }
 
   /**
