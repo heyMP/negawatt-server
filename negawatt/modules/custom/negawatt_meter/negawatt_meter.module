@@ -19,6 +19,16 @@ function negawatt_meter_is_meter($node_type) {
   return in_array($node_type, array('iec_meter', 'modbus_meter'));
 }
 
+/**
+ * Read image EFIX record and extract GPS location, if exists.
+ *
+ * @param $image
+ *    Path to image file.
+ *
+ * @return array|bool
+ *    array(LAT, LONG), if GPS data was found.
+ *    FALSE, if GPS data wasn't found in image.
+ */
 function negawatt_exif_to_latlong($image)
 {
   //Read EXIF data
@@ -49,7 +59,7 @@ function negawatt_exif_to_latlong($image)
     list($num, $dec) = explode('/', $lon[2]);
     $lon_v = $num / $dec;
 
-// Calculates the location in decimal form.
+    // Calculates the location in decimal form.
     $gps_int = array(
       ($lat_s + $lat_m / 60.0 + $lat_v / 3600.0) * ($lat_ref == 'N' ? +1 : -1),
       ($lon_s + $lon_m / 60.0 + $lon_v / 3600.0) * ($lon_ref == 'E' ? +1 : -1),
@@ -85,12 +95,13 @@ function negawatt_meter_node_presave($node) {
   // Check if image field was changed.
   $image_exists = $wrapper->field_image->value();
   $original_image_exists = $node->is_new ? FALSE : !empty($wrapper_original->field_image) && $wrapper_original->field_image->value();
-  $image_was_changed = !empty($node->is_new) && $image_exists  ||
+  $image_was_changed = $image_exists && !empty($node->is_new) ||
     $image_exists && !$original_image_exists ||
     $image_exists && $original_image_exists &&
     $wrapper->field_image[0]->file->fid->value() != $wrapper_original->field_image[0]->file->fid->value();
 
   if ($image_was_changed) {
+    // Try getting GPS data from EXIF record of the new image.
     $fid = $wrapper->field_image[0]->file->fid->value();
     $file = file_load($fid);
     $path = drupal_realpath($file->uri);
@@ -125,7 +136,7 @@ function negawatt_meter_node_presave($node) {
     $street_addr = $wrapper->field_place_address->value();
     $city = $wrapper->field_place_locality->value();
     $full_address = $street_addr . ', ' . $city;
-    $success = TRUE;
+    $geocode_succeeded = TRUE;
     try {
       $geocode = $geocoder->geocode($full_address);
       // Test that indeed geocode managed to decipher street address
@@ -138,20 +149,19 @@ function negawatt_meter_node_presave($node) {
     catch (Exception $e) {
       watchdog('iec geocode', 'Couldn`t geocode the address "@address"', array('@address' => $full_address), WATCHDOG_WARNING);
       $wrapper->field_location_valid->set(FALSE);
-      $success = FALSE;
+      $geocode_succeeded = FALSE;
     }
 
-    if (!$success) {
+    if (!$geocode_succeeded) {
       // Geocoding on full address failed, try locating on city name only.
       try {
         $street_addr = '';
         $geocode = $geocoder->geocode($city);
-        $success = TRUE;
+        $geocode_succeeded = TRUE;
       }
       catch (Exception $e) {
         // Geocoding failed.
         watchdog('iec geocode', 'Couldn`t geocode the city "@address"', array('@address' => $city), WATCHDOG_WARNING);
-        $success = FALSE;
       }
     }
 
@@ -160,8 +170,8 @@ function negawatt_meter_node_presave($node) {
     // Mark to recalculate location field.
     $location_changed = TRUE;
 
-    // Set location field, only if geolocation succeeded.
-    if (!$success) {
+    // Set location field, if geocoding was successful.
+    if ($geocode_succeeded) {
       $wrapper->field_address->set(array(
         'thoroughfare' => $street_addr,
         'locality' => $city,
@@ -170,6 +180,7 @@ function negawatt_meter_node_presave($node) {
     }
   }
 
+  // Update location field.
   if ($location_changed) {
     // hook_node_presave() is called after hook_field_presave(), so
     // geolocation_field_presave() was already called and will not be called

@@ -101,7 +101,7 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
    * @param $filter
    * @return array
    */
-  protected function handleMeterCategoryFilter($query, &$filter, $addGrouping = FALSE) {
+  protected function handleMeterCategoryFilter($query, &$filter, $addGrouping = TRUE) {
     // Handle meter categories.
 
     // Bother handling category filtering only if no 'meter' filter exists.
