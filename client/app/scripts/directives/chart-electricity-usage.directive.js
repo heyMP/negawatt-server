@@ -39,7 +39,7 @@ angular.module('negawattDirectives', [])
           ChartUsagePeriod.resetPeriods();
 
           // Update the electricity filters, only if are in the period change.
-          updateElectricityFilters(angular.extend({chartFreq: +type}, getPeriodParams(type)));
+          updateElectricityFilters({chartFreq: +type});
 
           // Refresh chart type.
           ctrlChart.hasData && refreshChart();
@@ -115,23 +115,23 @@ angular.module('negawattDirectives', [])
          *
          * @returns {{chartNextPeriod: *, chartPreviousPeriod: *}}
          */
-        function getPeriodParams(type) {
-
-          // Set frequency selected as active.
-          ChartUsagePeriod.setActiveFrequency(type);
-
-          // Set URL Period ({previous: number, next: number}) using $stateParams period parameters.
-          ChartUsagePeriod.setPeriod({
-            next: $stateParams.chartNextPeriod || null,
-            previous: $stateParams.chartPreviousPeriod || null
-          });
-
-          // Return a new paramenter from a Period previuos defined and saved.
-          return {
-            chartNextPeriod: ChartUsagePeriod.getPeriod().next,
-            chartPreviousPeriod: ChartUsagePeriod.getPeriod().previous
-          };
-        }
+        //function getPeriodParams(type) {
+        //
+        //  // Set frequency selected as active.
+        //  ChartUsagePeriod.setActiveFrequency(type);
+        //
+        //  // Set URL Period ({previous: number, next: number}) using $stateParams period parameters.
+        //  //ChartUsagePeriod.setPeriod({
+        //  //  next: $stateParams.chartNextPeriod || null,
+        //  //  previous: $stateParams.chartPreviousPeriod || null
+        //  //});
+        //
+        //  // Return a new paramenter from a Period previuos defined and saved.
+        //  return {
+        //    chartNextPeriod: ChartUsagePeriod.getPeriod().next,
+        //    chartPreviousPeriod: ChartUsagePeriod.getPeriod().previous
+        //  };
+        //}
 
         /**
          * Redender the chart with the frequency and period selected.
