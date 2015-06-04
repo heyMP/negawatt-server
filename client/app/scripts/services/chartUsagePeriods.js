@@ -30,10 +30,11 @@ angular.module('negawattClientApp')
      */
     this.getNewPeriod = function(type) {
       // Define new period.
-      var newPeriod = {
-        next: period.next,
-        previous: period.previous
-      };
+      var newPeriod = {};
+      //var newPeriod = {
+      //  next: period.next,
+      //  previous: period.previous
+      //};
 
       // Calculate the new period od period.
       if (type === 'next') {

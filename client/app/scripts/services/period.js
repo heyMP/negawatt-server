@@ -50,27 +50,35 @@ angular.module('negawattClientApp')
         return !this.previous;
       },
       /**
-       * check if the newPeriod is out of the range according the minimun and maximum defined.
+       * check if a period is out of the range according the minimun and maximum defined.
        *
-       * @param newPeriod
+       * @param period
        *  Period object {previous: number, next: number}
        *
        * @returns {boolean}
        *  Boolean value true if the period is out of range, otherwise false.
        */
-      isOutOfRange: function(newPeriod) {
+      isOutOfRange: function(period) {
         var outOfRange = false;
 
-        // In both are null is outOfRange.
-        if (!newPeriod.next && !newPeriod.previous) {
+        // Apply to the current period.
+        if (angular.isUndefined(period)) {
+          period = {
+            next: this.next,
+            previous: this.previous
+          }
+        }
+
+        // In both are null is Out of Range.
+        if (!period.next && !period.previous) {
           outOfRange = true;
         }
 
-        if (newPeriod.next && newPeriod.next > this.max || newPeriod.previous && newPeriod.previous > this.max ) {
+        if (period.next && period.next > this.max || period.previous && period.previous > this.max ) {
           outOfRange = true;
         }
 
-        if (newPeriod.next && newPeriod.next < this.min || newPeriod.previous && newPeriod.previous < this.min ) {
+        if (period.next && period.next < this.min || period.previous && period.previous < this.min ) {
           outOfRange = true;
         }
 
