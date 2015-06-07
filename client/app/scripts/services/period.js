@@ -15,7 +15,7 @@ angular.module('negawattClientApp')
        * @returns {boolean}
        */
       isConfigured: function() {
-        return !!$injector.get('Period').chart;
+        return !!this.chart;
       },
       /**
        * Set the default configuration of the period based on the type of Chart
