@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('negawattClientApp')
-  .factory('Period', function (moment) {
+  .factory('Period', function (moment, $injector) {
 
     return {
       max: null,
@@ -9,6 +9,9 @@ angular.module('negawattClientApp')
       next: null,
       previous: null,
       chart: null,
+      isConfigured: function() {
+        return !!$injector.get('Period').chart;
+      },
       /**
        * Set the default configuration of the period based on the type of Chart
        * and set his limits.
