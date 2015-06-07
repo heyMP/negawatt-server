@@ -18,7 +18,7 @@ angular.module('negawattDirectives', [])
           }
 
           // Directive configuration in case the Chart Period
-          if (!ctrlChart.isConfigured()) {
+          if (!ChartUsagePeriod.getPeriod().isConfigured()) {
             // Define the first period.
             limits = $filter('activeElectricityFilters')(ctrlChart.electricity, 'limits');
             ChartUsagePeriod.config(limits);
@@ -28,25 +28,21 @@ angular.module('negawattDirectives', [])
           if (FilterFactory.get('electricity-nodata')) {
             // Update parameters an refreshChart.
             updateElectricityFilters({chartFreq: +period.chart.type, chartNextPeriod: period.next, chartPreviousPeriod: period.previous});
-            debugger;
           }
 
           // Render the chart with the active selected data.
           render();
-          debugger;
-
 
           // Clear the spinner.
           ctrlChart.isLoading = false;
         }, true);
 
-        ctrlChart.__period = ChartUsagePeriod.getPeriod;
         // Update data object.
         // Get chart frequencies. (Tabs the period of time)
         ctrlChart.frequencies = ChartUsagePeriod.getFrequencies();
         // Check if next/previous period have data.
         ctrlChart.showNavigation = ChartUsagePeriod.hasPeriod;
-        ctrlChart.isConfigured = ChartUsagePeriod.getPeriod().isConfigured;
+        //ctrlChart.isConfigured = ChartUsagePeriod.getPeriod().isConfigured;
 
 
         /**
@@ -56,7 +52,7 @@ angular.module('negawattDirectives', [])
          *  The type of frequency according the period of time selected.
          */
         ctrlChart.changeFrequency = function(type) {
-          if (!ctrlChart.isConfigured()) {
+          if (!ChartUsagePeriod.getPeriod().isConfigured()) {
             return;
           }
           // Clear period when Change active frequency.

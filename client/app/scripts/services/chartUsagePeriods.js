@@ -65,8 +65,6 @@ angular.module('negawattClientApp')
      *  Return the actual period values.
      */
     this.changePeriod = function(periodDirection) {
-      var actual = $injector.get('ChartUsagePeriod');
-
       // Set the new period.
       actual.setPeriod(getNewPeriod(periodDirection));
 
@@ -83,14 +81,13 @@ angular.module('negawattClientApp')
      * @returns boolean
      */
     this.hasPeriod = function(periodDirection) {
-      var actual = $injector.get('ChartUsagePeriod');
       // Validate if next is equal o greater than the last limit.
       if (periodDirection === 'next') {
-        return !actual.getNewPeriod(periodDirection).isLast();
+        return getNewPeriod(periodDirection).isLast();
       }
 
       if (periodDirection === 'previous') {
-        return !actual.getNewPeriod(periodDirection).isFirst();
+        return getNewPeriod(periodDirection).isFirst();
       }
     };
 
