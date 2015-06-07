@@ -68,8 +68,8 @@ angular.module('negawattClientApp')
      *  }
      */
     this.setLimits = function(limits) {
-      period.max = limits && +limits.max;
-      period.min = limits && +limits.min;
+      period.max = limits && +limits.max || null;
+      period.min = limits && +limits.min || null;
     };
 
     /**
