@@ -11,6 +11,12 @@ angular.module('negawattClientApp')
     // Extend Period Factory.
     var period = angular.extend({}, Period);
 
+    this.config = function() {
+      debugger;
+      // Set frequency from selected chart configuration.
+      period.setConfig(this.getActiveFrequency());
+    };
+
     /**
      * Return the actual Period
      *
@@ -31,10 +37,6 @@ angular.module('negawattClientApp')
     this.getNewPeriod = function(type) {
       // Define new period.
       var newPeriod = {};
-      //var newPeriod = {
-      //  next: period.next,
-      //  previous: period.previous
-      //};
 
       // Calculate the new period od period.
       if (type === 'next') {
@@ -81,9 +83,6 @@ angular.module('negawattClientApp')
      *  New values of period object.
      */
     this.setPeriod = function(newPeriod) {
-      // Set frequency from selected chart configuration.
-      period.setConfig(this.getActiveFrequency());
-
       // If newPeriod is defined update limit of the chart.
       if (angular.isDefined(newPeriod)) {
         period.setPeriod(newPeriod);
@@ -93,8 +92,8 @@ angular.module('negawattClientApp')
     /**
      * Clear the actual period and the theirs limits.
      */
-    this.resetPeriods = function() {
-      angular.extend(period, {max: null, min: null, next: null, previous: null});
+    this.reset = function() {
+      angular.extend(period, {max: null, min: null, next: null, previous: null, chart: null});
     };
 
     /**
@@ -108,7 +107,8 @@ angular.module('negawattClientApp')
      */
     this.changePeriod = function(type) {
       var actual = $injector.get('ChartUsagePeriod');
-      // Ser the new period.
+
+      // Set the new period.
       actual.setPeriod(actual.getNewPeriod(type));
 
       return actual.getPeriod();
