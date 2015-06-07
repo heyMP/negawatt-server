@@ -9,6 +9,11 @@ angular.module('negawattClientApp')
       next: null,
       previous: null,
       chart: null,
+      /**
+       * Return truthy is existe a chart object setted. other wise falsy.
+       *
+       * @returns {boolean}
+       */
       isConfigured: function() {
         return !!$injector.get('Period').chart;
       },
