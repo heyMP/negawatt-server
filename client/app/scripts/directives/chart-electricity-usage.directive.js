@@ -106,42 +106,12 @@ angular.module('negawattDirectives', [])
         }
 
         /**
-         * Get the actual period, from URL or default Pariod values.
-         * the object is returning in in a URL query string parameters format.
-         *
-         *
-         * @param type
-         *  The size of the period thata we wnats to return.
-         *
-         * @returns {{chartNextPeriod: *, chartPreviousPeriod: *}}
-         */
-        //function getPeriodParams(type) {
-        //
-        //  // Set frequency selected as active.
-        //  ChartUsagePeriod.setActiveFrequency(type);
-        //
-        //  // Set URL Period ({previous: number, next: number}) using $stateParams period parameters.
-        //  //ChartUsagePeriod.setPeriod({
-        //  //  next: $stateParams.chartNextPeriod || null,
-        //  //  previous: $stateParams.chartPreviousPeriod || null
-        //  //});
-        //
-        //  // Return a new paramenter from a Period previuos defined and saved.
-        //  return {
-        //    chartNextPeriod: ChartUsagePeriod.getPeriod().next,
-        //    chartPreviousPeriod: ChartUsagePeriod.getPeriod().previous
-        //  };
-        //}
-
-        /**
          * Redender the chart with the frequency and period selected.
          */
         function render() {
           // Set limits and data to charts, wuth the active electricity request.
           ctrlChart.data = $filter('toChartDataset')($filter('activeElectricityFilters')(ctrlChart.electricity));
           ChartUsagePeriod.setLimits($filter('activeElectricityFilters')(ctrlChart.electricity, 'limits'));
-
-
         }
 
       },
