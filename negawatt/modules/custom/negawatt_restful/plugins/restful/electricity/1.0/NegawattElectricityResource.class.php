@@ -427,6 +427,11 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
 
     $query = parent::getQuery();
 
+    if (!empty($request['nodata']) && $request['nodata']) {
+      // Add a condition that will omit all data from output, leaving only summary.
+      $query->condition('timestamp', 0);
+    }
+
     // Add a query for meter_category and meter_account.
     $this->addQueryForCategoryAndAccount($query);
 
