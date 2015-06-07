@@ -83,11 +83,11 @@ angular.module('negawattClientApp')
     this.hasPeriod = function(periodDirection) {
       // Validate if next is equal o greater than the last limit.
       if (periodDirection === 'next') {
-        return getNewPeriod(periodDirection).isLast();
+        return !getNewPeriod(periodDirection).isLast();
       }
 
       if (periodDirection === 'previous') {
-        return getNewPeriod(periodDirection).isFirst();
+        return !getNewPeriod(periodDirection).isFirst();
       }
     };
 
