@@ -42,8 +42,6 @@ angular.module('negawattDirectives', [])
         ctrlChart.frequencies = ChartUsagePeriod.getFrequencies();
         // Check if next/previous period have data.
         ctrlChart.showNavigation = ChartUsagePeriod.hasPeriod;
-        //ctrlChart.isConfigured = ChartUsagePeriod.getPeriod().isConfigured;
-
 
         /**
          * Change frequency of the chart.

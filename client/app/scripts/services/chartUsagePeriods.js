@@ -33,21 +33,6 @@ angular.module('negawattClientApp')
       return period;
     };
 
-    ///**
-    // * Extend the time stamp object with the actual period selection.
-    // *
-    // * @param chart
-    // *  Chart default configuration.
-    // * @param newPeriod
-    // *  New values of period object.
-    // */
-    //this.setPeriod = function(newPeriod) {
-    //  // If newPeriod is defined update limit of the chart.
-    //  if (angular.isDefined(newPeriod)) {
-    //    period.setPeriod(newPeriod);
-    //  }
-    //};
-
     /**
      * Clear the actual period and the theirs limits.
      */
@@ -66,9 +51,9 @@ angular.module('negawattClientApp')
      */
     this.changePeriod = function(periodDirection) {
       // Set the new period.
-      actual.setPeriod(getNewPeriod(periodDirection));
+      period.setPeriod(getNewPeriod(periodDirection));
 
-      return actual.getPeriod();
+      return this.getPeriod();
     }
 
     /**
