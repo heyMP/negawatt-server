@@ -10,13 +10,16 @@ angular.module('negawattDirectives', [])
 
         // Update the Chart data every time the electricity data.
         $scope.$watch('ctrlChart.electricity', function(current) {
+          var limits;
+
           if (Utils.isEmpty(current)) {
             return;
           }
 
           if (!ctrlChart.isConfigured()) {
             // Define the first period.
-            ChartUsagePeriod.config();
+            limits = $filter('activeElectricityFilters')(ctrlChart.electricity, 'limits');
+            ChartUsagePeriod.config(limits);
             debugger;
           }
 
@@ -119,7 +122,7 @@ angular.module('negawattDirectives', [])
         function render() {
           // Set limits and data to charts, wuth the active electricity request.
           ctrlChart.data = $filter('toChartDataset')($filter('activeElectricityFilters')(ctrlChart.electricity));
-          ChartUsagePeriod.setLimits($filter('activeElectricityFilters')(ctrlChart.electricity, 'limits'));
+          //ChartUsagePeriod.setLimits($filter('activeElectricityFilters')(ctrlChart.electricity, 'limits'));
         }
 
       },

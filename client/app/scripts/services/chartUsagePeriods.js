@@ -11,10 +11,14 @@ angular.module('negawattClientApp')
     // Extend Period Factory.
     var period = angular.extend({}, Period);
 
-    this.config = function() {
-      debugger;
+
+    this.config = function(limits) {
+      period.setLimits(limits)
       // Set frequency from selected chart configuration.
-      period.setConfig(this.getActiveFrequency());
+      period.setTimeFrame(this.getActiveFrequency());
+      // Set initial period according the time frame.
+      period.setPeriod();
+      debugger;
     };
 
     /**
@@ -56,22 +60,6 @@ angular.module('negawattClientApp')
       // Extend the Period factory methods.
       newPeriod = extend(copy(period), newPeriod);
       return newPeriod;
-    };
-
-    /**
-     * Set the limits (maximum and minimum) values for the period of the chart,
-     * expresed in timestamp unix format.
-     *
-     * @param max
-     *  The maximun and minimum dates.
-     *  {
-     *    max: timestamp,
-     *    min: timestamp
-     *  }
-     */
-    this.setLimits = function(limits) {
-      period.max = limits && +limits.max || null;
-      period.min = limits && +limits.min || null;
     };
 
     /**

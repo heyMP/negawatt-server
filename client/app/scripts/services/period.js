@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('negawattClientApp')
-  .factory('Period', function (moment, $injector) {
+  .factory('Period', function ($injector, moment, Utils) {
 
     return {
       max: null,
@@ -23,29 +23,50 @@ angular.module('negawattClientApp')
        *
        * @param chart
        */
-      setConfig: function(chart) {
+      setTimeFrame: function(chart) {
         // Save chart configuration.
         this.chart = chart;
-
-        // Set the next timestamp by default in 'now' of maximum limit.
-        this.next = (this.max && moment().isAfter(moment.unix(this.max))) ? this.max : moment().unix();
-        this.previous = this.getPrevious();
-
       },
-      // Check the chart limits, with the information obtained from the server. (example meters).
+      /**
+       * Set the limits (maximum and minimum) values for the period of the chart,
+       * expresed in timestamp unix format.
+       *
+       * @param max
+       *  The maximun and minimum dates.
+       *  {
+       *    max: timestamp,
+       *    min: timestamp
+       *  }
+       */
+      setLimits: function(limits) {
+        this.max = limits && +limits.max || null;
+        this.min = limits && +limits.min || null;
+      },
+      /**
+       * Set next/previos values from the actual period object information.
+       *
+       * @param newPeriod
+       *  New values of period object.
+       */
       setPeriod: function(newPeriod) {
+        // Set initial values.
+        if (angular.isUndefined(newPeriod) && Utils.isEmpty(this.next)){
+          this.next = this.max;
+        }
+        else {
+          // Set default if is oout of range.
+          if (this.isOutOfRange(newPeriod)) {
+            // Set the next timestamp by default in 'now' of maximum limit.
+            this.next = this.max || moment().unix();
+          }
 
-        // Set default if is oout of range.
-        if (this.isOutOfRange(newPeriod)) {
-          // Set the next timestamp by default in 'now' of maximum limit.
-          this.next = this.max || moment().unix();
+          // Set according current newPeriod.
+          if (newPeriod.next && newPeriod.previous && !this.isOutOfRange(newPeriod) ) {
+            // Comming from the calculation.
+            this.next = newPeriod.next;
+          }
         }
 
-        // Set according current newPeriod.
-        if (newPeriod.next && newPeriod.previous && !this.isOutOfRange(newPeriod) ) {
-          // Comming from the calculation.
-          this.next = newPeriod.next;
-        }
         this.previous = this.getPrevious();
       },
       getPrevious: function() {
