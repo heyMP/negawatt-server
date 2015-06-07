@@ -86,6 +86,7 @@ function negawatt_meter_node_presave($node) {
   }
 
   require_once libraries_get_path('geocoder') . '/src/autoload.php';
+  require_once 'profiles/negawatt/negawatt-config.php';
 
   $wrapper = entity_metadata_wrapper('node', $node);
   // New node doesn't have 'original' field.
@@ -129,7 +130,7 @@ function negawatt_meter_node_presave($node) {
     $provider = &drupal_static(__FUNCTION__ . '_provider', NULL);
     $geocoder = &drupal_static(__FUNCTION__ . '_geocoder', NULL);
     $adapter = $adapter ? $adapter : new \Geocoder\HttpAdapter\CurlHttpAdapter();
-    $provider = $provider ? $provider : new \Geocoder\Provider\GoogleMapsProvider($adapter);
+    $provider = $provider ? $provider : new \Geocoder\Provider\GoogleMapsProvider($adapter, null, null, false, $config->google_maps_api_key);
     $geocoder = $geocoder ? $geocoder : new \Geocoder\Geocoder($provider);
 
     // Look for geocode.
