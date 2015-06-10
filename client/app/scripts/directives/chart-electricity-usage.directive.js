@@ -56,11 +56,12 @@ angular.module('negawattDirectives', [])
           if (!ChartUsagePeriod.getPeriod().isConfigured()) {
             return;
           }
-          // Clear period when Change active frequency.
-          ChartUsagePeriod.reset();
 
           // Update the electricity filters, only if are in the period change.
-          updateElectricityFilters({chartFreq: +type, chartNextPeriod: null, chartPreviousPeriod: null});
+          updateElectricityFilters({chartFreq: +type, chartNextPeriod: null, chartPreviousPeriod: null}, true);
+
+          // Redraw the chart.
+          render();
 
           // Refresh chart type.
           ctrlChart.hasData && refreshChart();
@@ -86,7 +87,7 @@ angular.module('negawattDirectives', [])
          * parameter, otherwise false.
          */
         ctrlChart.hasData = function hasData() {
-          return !!$filter('activeElectricityFilters')(ctrlChart.electricity).length;
+          return !!$filter('activeElectricityFilters')(ctrlChart.electricity).length || false;
         }
 
         /**
@@ -103,8 +104,11 @@ angular.module('negawattDirectives', [])
          *
          * @param params
          *  The new parameters to be updated on the filters.
+         * @param reset
+         *  Reset first the previuos filters.
          */
-        function updateElectricityFilters(params) {
+        function updateElectricityFilters(params, reset) {
+          reset && ChartUsagePeriod.reset();
           // Update url with params updated.
           angular.extend($stateParams, params);
           $state.refreshUrlWith($stateParams);
