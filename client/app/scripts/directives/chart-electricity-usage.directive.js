@@ -36,9 +36,9 @@ angular.module('negawattDirectives', [])
             // Render the chart with the active selected data.
             render();
 
-            // Clear the spinner.
-            ctrlChart.isLoading = false;
           }
+          // Clear the spinner.
+          ctrlChart.isLoading = false;
 
         }, true);
 
@@ -55,14 +55,34 @@ angular.module('negawattDirectives', [])
          *  The type of frequency according the period of time selected.
          */
         ctrlChart.changeFrequency = function(type) {
-          // Update the electricity filters, only if are in the period change.
-          updateElectricityFilters({chartFreq: +type, chartNextPeriod: null, chartPreviousPeriod: null}, true);
+          $scope.$on('activeMeter', function(meter) {
+            // Update the electricity filters, only if are in the period change.
+            updateElectricityFilters({chartFreq: +type, chartNextPeriod: null, chartPreviousPeriod: null}, true);
 
-          // Redraw the chart.
-          render();
+            // Redraw the chart.
+            render();
 
-          // Refresh chart type.
-          ctrlChart.hasData && refreshChart();
+            // Refresh chart type.
+            ctrlChart.hasData && refreshChart();
+          });
+
+          if (FilterFactory.get('meter')) {
+            return;
+          }
+          else
+          {
+
+            // Update the electricity filters, only if are in the period change.
+            updateElectricityFilters({chartFreq: +type, chartNextPeriod: null, chartPreviousPeriod: null}, true);
+
+            // Redraw the chart.
+            render();
+
+            // Refresh chart type.
+            ctrlChart.hasData && refreshChart();
+          }
+
+
         }
 
         /**
