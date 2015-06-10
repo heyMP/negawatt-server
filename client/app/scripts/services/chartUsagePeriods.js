@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('negawattClientApp')
-  .service('ChartUsagePeriod', function (Period, Chart, moment, $injector) {
+  .service('ChartUsagePeriod', function (Utils, Period, Chart, moment, $injector) {
 
     // Extend Period Factory.
     var extend = angular.extend;
@@ -89,14 +89,14 @@ angular.module('negawattClientApp')
       var newPeriod = {};
 
       // Calculate the new period od period.
-      if (periodDirection === 'next') {
+      if (periodDirection === 'next' && period.next) {
         newPeriod = {
           next: (moment.unix(period.next).isAfter(moment.unix(period.max), period.chart.frequency) || moment.unix(period.next).isSame(moment.unix(period.max), period.chart.frequency)) ? null : period.add(period.next).unix(),
           previous: period.add(period.previous).unix()
         };
       }
       // This calculate the previous period.
-      if (periodDirection === 'previous'){
+      if (periodDirection === 'previous' && period.previous){
         newPeriod = {
           next: period.subtract(period.next).unix(),
           previous: (moment.unix(period.previous).isBefore(moment.unix(period.min), period.chart.frequency) || moment.unix(period.previous).isSame(moment.unix(period.min), period.chart.frequency)) ? null : period.subtract(period.previous).unix()
