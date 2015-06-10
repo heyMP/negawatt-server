@@ -67,7 +67,8 @@ angular.module('negawattClientApp')
           }
         }
 
-        this.previous = this.getPrevious();
+        // Only make calculation when next timestamp is defiend.
+        this.previous = (this.next === null) ? null : this.getPrevious();
       },
       getPrevious: function() {
         return moment.unix(this.next).subtract(this.chart && this.chart.chart_default_time_frame, this.chart && this.chart.frequency).unix();
