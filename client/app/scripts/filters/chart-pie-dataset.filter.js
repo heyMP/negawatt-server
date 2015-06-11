@@ -13,7 +13,7 @@ angular.module('negawattClientApp')
     return function (collection){
       // Recreate collection object.
       collection = {
-        type: 'PieChart';,
+        type: 'PieChart',
         data: getDataset(collection),
         options: getOptions(chartFrequencyActive)
       }
