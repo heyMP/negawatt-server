@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('negawattClientApp')
-  .controller('MenuCtrl', function($scope, $state, $stateParams, $location, $window, amMoment, Timedate, Category, account, profile, MeterFilter, Meter) {
+  .controller('MenuCtrl', function($scope, $state, $stateParams, $location, $window, amMoment, Timedate, Category, account, profile, FilterFactory, Meter) {
     $scope.account = account;
     $scope.user = profile.user;
     $scope.timedate = Timedate;
@@ -11,8 +11,13 @@ angular.module('negawattClientApp')
      * Reset category selection and back to the home.
      */
     $scope.reloadDashboard = function() {
-      Category.clearSelectedCategory();
-      MeterFilter.clear();
+      // Clear filters.
+      FilterFactory.clear();
+
+      // Reset categories filters.
+      Category.reset();
+
+      // Refresh home and meter's map.
       $location.url($state.href('dashboard.withAccount').slice(2));
       Meter.refresh();
     };

@@ -8,20 +8,17 @@
  * Controller of the negawattClientApp
  */
 angular.module('negawattClientApp')
-  .controller('CategoryCtrl', function ($scope, $state, $stateParams, $filter, Category, Meter, categories, meters) {
+  .controller('CategoryCtrl', function ($scope, $state, $stateParams, $filter, Category, Meter, FilterFactory, categories, meters) {
 
     // Define property in the parent scope, permit to be accesable
     // by scope methods of the controller.
-    $scope.categoriesChecked = {};
 
     $scope.categories = categories;
     $scope.accountId = $stateParams.accountId;
     $scope.chartFreq = $stateParams.chartFreq;
 
     // Activate filter of meters only if we are in the principal state.
-    if ($state.is('dashboard.withAccount')) {
-      $scope.filterMeters = true;
-    }
+    $scope.filterMeters = FilterFactory.showCategoryFilters();
 
      /**
      * Determine if a category has meters.
@@ -39,13 +36,20 @@ angular.module('negawattClientApp')
     /**
      * Check/Unckeck category to filter meters over the map.
      *
+     * @param id
+     *  The category id of the element selected.
      */
-    $scope.toggleMetersByCategory = function() {
-      // Update meters on the map.
+    $scope.toggleMetersByCategory = function(category) {
+      // Set category filters.
+      var filter = {};
+      filter[category.id] = category.checked;
+      FilterFactory.set('categorized', filter);
+
+      // Update meters on the map, this also update the number of meters on the Category menu.
       $scope.$parent.$broadcast('nwMetersChanged', {
-        list: $filter('filterMeterByCategories')(meters.list, getCategoriesChecked())
+        list: FilterFactory.byCategoryFilters(meters)
       });
-    }
+    };
 
     /**
      * Select a category forcing reload of the state, used after query search without reloading.
@@ -53,35 +57,21 @@ angular.module('negawattClientApp')
      * @param categoryId
      */
     $scope.select = function(categoryId) {
-      $state.forceGo('dashboard.withAccount.categories', {categoryId: categoryId});
-    }
+      FilterFactory.clearMeterSelection();
+      $state.forceGo('dashboard.withAccount.categories', {categoryId: categoryId, chartNextPeriod: undefined, chartPreviousPeriod: undefined});
+    };
 
     // Reload the categories when added new meters to the map.
     $scope.$on('nwMetersChanged', function(event, meters) {
+      // Update categories tree with number of meters.
+
       Category.get($stateParams.accountId)
         .then(function(categories) {
+          // Update 'categories' object resolved by ui-router.
           $state.setGlobal('categories', categories);
           $scope.categories = categories;
         });
     });
-
-    /**
-     * Return an array of the category ids, checeked.
-     *
-     * @returns {Array}
-     */
-    function getCategoriesChecked() {
-      var filter = [];
-
-      // Return filter object.
-      angular.forEach($scope.categoriesChecked, function(categoryChecked, index) {
-        if (!categoryChecked) {
-          this.push(index);
-        }
-      }, filter);
-
-      return filter;
-    }
 
     /**
      * Set the selected category, to keep in other states.
@@ -90,7 +80,7 @@ angular.module('negawattClientApp')
      *   The Category ID.
      */
     function setSelectedCategory(id) {
-      Category.setSelectedCategory(id);
+      FilterFactory.set('category', id);
     }
 
     if ($stateParams.categoryId) {

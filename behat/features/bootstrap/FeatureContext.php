@@ -48,7 +48,7 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
 
     if ($check_success) {
       // Wait for the dashboard's menu to load, with the user accout information.
-      $this->iWaitForCssElement('.menu-account', 'appear');
+      $this->iWaitForCssElement('#dashboard-controls > ui-view > div.menu-account', 'appear');
     }
   }
 
@@ -89,6 +89,14 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
   }
 
   /**
+   * @Then I should see all categories inactive
+   */
+  public function iShouldSeeAllCategoriesInactive() {
+    $this->iWaitForCssElement('.active-category', 'disappear');
+  }
+
+
+  /**
    * @Then I should see :markers markers
    */
   public function iShouldSeeMarkers($markers, $equals = TRUE) {
@@ -114,13 +122,14 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
    */
   public function iShouldSeeAMarkerSelected() {
     $selected_src_image = '-red.png';
+
     // check if exist and is selected.
     $this->waitFor(function($context) use ($selected_src_image) {
       try {
         // Get an array of string <img src="...">, filled with the value of the src attribute of the marker icon image and check id selected (if have ) '-red.png'.
         $marker_selected = $context->getSession()->evaluateScript('angular.element(".leaflet-marker-icon").map(function(index, element){ return angular.element(element).attr("src").indexOf("' . $selected_src_image . '") }).toArray();');
         // Reduce the array to empty or the position of the selected marker.
-        $result = max($marker_selected);
+        $result = (!empty($marker_selected)) ? max($marker_selected): 0;
 
         if ($result > 0) {
           return TRUE;
@@ -158,8 +167,8 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
   public function iShouldSeeTheMonthlyKwsChartOfAllMeters() {
     // Testing the height of the first and last column, with the default chart size and data of the migration.
     $start_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(1) > td:nth-child(2)';
-    $end_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(24) > td:nth-child(2)';
-    $this->waitForTextNgElement($start_chart, '7836');
+    $end_chart = '#chart-usage > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(6) > td:nth-child(2)';
+    $this->waitForTextNgElement($start_chart, '11131');
     $this->waitForTextNgElement($end_chart, '12318');
   }
 
@@ -175,7 +184,7 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
 
 
   /**
-   * @Then I should see the monthly kws chart a meter
+   * @Then I should see the monthly kws chart of a meter
    */
   public function iShouldSeeTheMonthlyKwsChartAMeter() {
     // Testing the height of the first and last column, with the default chart size and data of the migration.
@@ -189,18 +198,93 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
    * @When I click meter :meter
    */
   public function iClickMeter($meter) {
-    $this->getSession()->evaluateScript('function clickMeter(e){var a={},l=Object.keys(angular.element("div.angular-leaflet-map").scope().meters);angular.element(".leaflet-marker-icon").map(function(e,r){var c=l[e];a[c]={L:r,id:c,marker:angular.element(r).bind("click")}}),a[e].marker.click()};clickMeter(' . $meter . ');');
+    try
+    {
+      //Wait for Angular
+      if($this->getSession()->evaluateScript("return (typeof angular != 'undefined')"))
+      {
+        $angular = 'angular.getTestability(document.body).whenStable(function() {
+                    window.__testable = true;
+                })';
+        $this->getSession()->evaluateScript($angular);
+        $this->getSession()->wait(5000, 'window.__testable == true');
+        // Update with the script to click on a meter
+        $script = '(function clickMeter(id) {
+            var $injector = angular.element("body").injector();
+            var leafletData = $injector.get("leafletData");
+            var Utils = $injector.get("Utils");
+            var $filter = $injector.get("$filter");
+            var scopeMeters = angular.element(".angular-leaflet-map").scope().meters;
+
+            leafletData.getMarkers().then(function(meters) {
+              angular.forEach(meters, function(meter, index) {
+                meter.options.idLeaflet = index;
+              });
+
+              this.meterData = ($filter("filter")(Utils.toArray(meters), {options: {idLeaflet: id}})).pop();
+
+              scopeMeters[this.meterData.options.id].select();
+            }.bind(this));
+
+          })(' . $meter . ')';
+        $this->getSession()->evaluateScript($script);
+      }
+
+      //Wait for jQuery
+      if($this->getSession()->evaluateScript("return (typeof jQuery != 'undefined')"))
+      {
+        $this->getSession()->wait(5000, '(0 === jQuery.active && 0 === jQuery(\':animated\').length)');
+      }
+
+    }catch(Exception $e)
+    {
+
+    }
+
+  }
+
+  /**
+   * @Then I see a marker :meter not selected
+   */
+  public function iSeeAMarkerNotSelected($meter) {
+    $this->iSeeAMarkerSelected($meter, FALSE);
   }
 
 
   /**
    * @Then I see a marker :meter selected
    */
-  public function iSeeAMarkerSelected($meter) {
-    $this->waitFor(function($context) use ($meter) {
+  public function iSeeAMarkerSelected($meter, $is_selected = TRUE) {
+    $selected_src_image = ($is_selected) ? '-red.png' : '-blue.png';
+
+    $this->waitFor(function($context) use ($meter, $selected_src_image) {
       try {
-        $element_attribute = $context->getSession()->evaluateScript('function getMetersImgSrc(e){var r={},a=Object.keys(angular.element("div.angular-leaflet-map").scope().meters);return angular.element(".leaflet-marker-icon").map(function(e,t){var n=a[e];r[n]={L:t,id:n,marker:angular.element(t).bind("click")}}),angular.element(r[e].L).attr("src")}getMetersImgSrc(' . $meter . ');');
-        if ($element_attribute !== NULL && $element_attribute == $value) {
+
+        // Script to get the hmtl icon image.
+        $script = '(function getMeterImgSrc(id) {
+            var $injector = angular.element("body").injector();
+            var leafletData = $injector.get("leafletData");
+            var Utils = $injector.get("Utils");
+            var $filter = $injector.get("$filter");
+            var $rootScope = $injector.get("$rootScope");
+
+            leafletData.getMarkers().then(function(meters) {
+              angular.forEach(meters, function(meter, index) {
+                meter.options.idLeaflet = index;
+              });
+
+              this.meterData = ($filter("filter")(Utils.toArray(meters), {options: {idLeaflet: id}})).pop();
+
+            }.bind(this));
+
+            $rootScope.$apply();
+            return angular.element(this.meterData._icon).attr("src").indexOf("' . $selected_src_image . '");
+
+          })(' . $meter . ')';
+
+        $result = $context->getSession()->evaluateScript($script);
+
+        if ($result > 0) {
           return TRUE;
         }
         return FALSE;
@@ -281,6 +365,26 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
   }
 
   /**
+   * @Then I should see today date
+   */
+  public function iShouldSeeTodayDate() {
+    $csspath = '.menu-timedate-date';
+    // Get today date direct from momentjs object in tha same format.
+    $today = $this->getSession()->evaluateScript("moment().locale('he').format('YYYY MMMM DD');");
+
+    $this->waitForTextNgElement($csspath, $today);
+  }
+
+  /**
+   * @Then I should see :message in the chart of kws usage
+   */
+  public function iShouldSeeInTheChartOfKwsUsage($message) {
+    $csspath = '#dashboard-controls > div > ui-view.dashboard-controls.dashboard-controls-row.dashboard-usage.ng-scope > div.row.chart-empty.ng-scope > div';
+    $this->waitForTextNgElement($csspath, $message);
+  }
+
+
+  /**
    * @AfterStep
    *
    * Take a screen shot after failed steps for Selenium drivers (e.g.
@@ -343,6 +447,10 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
    * @throws Exception
    */
   private function waitFor($fn, $timeout = 30000) {
+    if (empty($timeout)) {
+      $timeout = 30000;
+    }
+
     $start = microtime(true);
     $end = $start + $timeout / 1000.0;
     while (microtime(true) < $end) {
@@ -392,7 +500,7 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
    *
    * @throws Exception
    */
-  private function waitForTextNgElement($csspath, $text) {
+  private function waitForTextNgElement($csspath, $text, $timeout = NULL) {
     $this->waitFor(function($context) use ($csspath, $text) {
       try {
         $element_text = $context->getSession()->evaluateScript('angular.element("' . $csspath . '").text();');
@@ -407,7 +515,7 @@ class FeatureContext extends DrupalContext implements SnippetAcceptingContext {
         }
         throw $e;
       }
-    });
+    }, $timeout);
   }
 
   /**

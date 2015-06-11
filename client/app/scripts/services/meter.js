@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('negawattClientApp')
-  .service('Meter', function ($q, $http, $timeout, $rootScope, Config, Marker, Utils, MeterFilter) {
+  .service('Meter', function ($q, $http, $timeout, $rootScope, Config, Marker, Utils, FilterFactory) {
     var self = this;
 
     // A private cache key.
@@ -33,7 +33,7 @@ angular.module('negawattClientApp')
 
       // Filtering in the case we have categoryId defined.
       if (angular.isDefined(categoryId)) {
-        MeterFilter.filters.category = categoryId;
+        FilterFactory.set('category', categoryId);
       }
 
       // Clear the promise cached, after resolve or reject the promise. Permit access to the cache data, when
@@ -71,7 +71,7 @@ angular.module('negawattClientApp')
       // Define endpoint with filters.
       // Get only meters that has electricity data.
       url = Config.backend + '/api/meters?'
-        + 'filter[has_electricity]=1'
+//        + 'filter[has_electricity]=1'
         + '&filter[account]=' + accountId
         + '&page=' + pageNumber;
 
@@ -111,14 +111,14 @@ angular.module('negawattClientApp')
           // Keep the actual collection filtered, used to show into the map.
           list: {},
           // Interval information for electricity chart.
-          total: {}
+          summary: {}
         };
       }
 
       // Extend meters properties explicit because we don have deep copy.
       // TODO: from angular v1.4 use angular.merge().
-      angular.extend(cache.data.listAll, data.list);
-      angular.extend(cache.data.total, data.total);
+      angular.extend(cache.data.listAll, data && data.list);
+      angular.extend(cache.data.summary, data && data.summary);
       cache.timestamp = new Date();
 
       // Broadcast and event to update the markers in the map.
@@ -136,10 +136,10 @@ angular.module('negawattClientApp')
         return;
       }
 
-      // Clear cache in 10 minutes.
+      // Clear cache in 60 minutes.
       $timeout(function timeoutResetCache() {
         cache.data = undefined;
-      }, 600000);
+      }, 3600000);
     }
 
     /**
@@ -180,7 +180,8 @@ angular.module('negawattClientApp')
         }
 
         // Set meter tooltip
-        meters.data.list[item.id].message = item.place_description + '<br>' + item.place_address + '<br>' + item.place_locality;
+        meters.data.list[item.id].message = (item.image ? ('<img src="' + item.image.url + '"><br>') : '') +
+          item.place_description + '<br>' + item.place_address + '<br>' + item.place_locality;
 
         // Extend meter with marker properties and methods.
         angular.extend(meters.data.list[item.id], Marker);
@@ -189,8 +190,8 @@ angular.module('negawattClientApp')
         meters.data.list[item.id].unselect();
       });
 
-      // Add total property inside the meter data object, as private property.
-      meters.data.total = response.total;
+      // Add summary property inside the meter data object, as private property.
+      meters.data.summary = response.summary;
 
       return meters;
     }
@@ -202,7 +203,15 @@ angular.module('negawattClientApp')
      */
     function metersFiltered() {
       if (angular.isDefined(cache.data)) {
-        cache.data.list = MeterFilter.byCategory(cache.data);
+
+        // Filter by categories filters unchecked (checkboxes).
+        cache.data.list = FilterFactory.byCategoryFilters(cache.data);
+
+        // Filter by a category is active.
+        if (FilterFactory.isDefine('category')) {
+          cache.data.list = FilterFactory.byCategory(cache.data);
+        }
+
       }
       return cache.data;
     }

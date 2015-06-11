@@ -50,6 +50,12 @@ projects[flag][version] = "2.2"
 projects[geolocation][subdir] = "contrib"
 projects[geolocation][version] = "1.6"
 
+projects[imagecache_actions][subdir] = "contrib"
+projects[imagecache_actions][version] = "1.5"
+
+projects[imagemagick][subdir] = "contrib"
+projects[imagemagick][version] = "1.x"
+
 projects[jquery_update][subdir] = "contrib"
 projects[jquery_update][version] = "2.4"
 
@@ -91,11 +97,7 @@ projects[og_vocab][version] = "1.2"
 projects[purl][subdir] = "contrib"
 projects[purl][version] = "1.x-dev"
 
-projects[restful][download][type] = "git"
-projects[restful][download][url] = "https://github.com/Gizra/restful.git"
-projects[restful][download][branch] = 7.x-1.x
 projects[restful][subdir] = "contrib"
-projects[restful][type] = "module"
 
 projects[search_api][subdir] = "contrib"
 projects[search_api][version] = "1.12"
@@ -113,7 +115,7 @@ projects[token][subdir] = "contrib"
 projects[token][version] = "1.6"
 
 projects[views][subdir] = "contrib"
-projects[views][version] = "3.10"
+projects[views][version] = "3.11"
 
 projects[views_bulk_operations][subdir] = "contrib"
 projects[views_bulk_operations][version] = "3.2"
