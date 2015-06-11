@@ -11,7 +11,7 @@ angular.module('negawattClientApp')
      *  The electricity summary object.
      */
     return function (electricity){
-      return electricity && electricity.summary || {};
+      return electricity && electricity.summary || undefined;
     }
 
   });

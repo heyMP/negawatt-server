@@ -15,7 +15,7 @@ angular.module('negawattClientApp')
       collection = {
         type: 'PieChart',
         data: getDataset(collection),
-        options: getOptions(chartFrequencyActive)
+        options: getOptions()
       }
       return collection;
     }
