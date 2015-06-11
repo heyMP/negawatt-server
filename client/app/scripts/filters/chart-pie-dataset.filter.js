@@ -1,20 +1,23 @@
 angular.module('negawattClientApp')
-  .filter('toPieChartDataset', function (Chart, ChartOptions) {
+  .filter('toPieChartDataset', function (Utils, Chart, ChartOptions) {
 
     /**
      * From a collection object create a Google Chart data for a Pie object
      *
-     * @param collection
-     *  The collection to format.
+     * @param collections
+     *  The collections to get data, label and generate the dataset.
      *
      * @returns {*}
      *  The dataset collection filtered.
      */
-    return function (collection){
+    return function (collections){
+      var data = angular.isArray(collections[0]) || collections;
+      var labels = angular.isArray(collections[1]) || {};
+
       // Recreate collection object.
       collection = {
         type: 'PieChart',
-        data: getDataset(collection),
+        data: getDataset(data, labels),
         options: getOptions()
       }
       return collection;
@@ -23,12 +26,10 @@ angular.module('negawattClientApp')
     /**
      * Return the options of the selected chart.
      *
-     * @param chartFrequencyActive
-     *  The specific chart options of the seleted frequency.
      * @returns {*}
      *  Chart options object.
      */
-    function getOptions(chartFrequencyActive) {
+    function getOptions() {
       return {};
     }
 
@@ -38,13 +39,13 @@ angular.module('negawattClientApp')
      * @param collection
      *  The collection to format.
      */
-    function getDataset(collection) {
+    function getDataset(collection, labels) {
       var dataset = {
         'cols': [
           {id: 't', label: 'Categories', type: 'string'},
           {id: 's', label: 'Slices', type: 'number'}
         ],
-        'rows': getRows(collection.values, collection.type)
+        'rows': getRows(collection.values, collection.type, labels)
       };
 
       return dataset;
@@ -73,7 +74,7 @@ angular.module('negawattClientApp')
           angular.forEach(obj, function(value, key) {
             this.push({
               c: [
-                {v: 'row.label'},
+                {v: !Utils.isEmpty(labels) && labels[key].title || 'label' + key},
                 {v: value},
                 {id: key}
               ]
