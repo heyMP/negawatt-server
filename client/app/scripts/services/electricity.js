@@ -130,7 +130,8 @@ angular.module('negawattClientApp')
       cache[key] = {
         data: (cache[key] ? cache[key].data : []).concat(electricity.data),
         limits: electricity.summary.timestamp,
-        timestamp: new Date()
+        timestamp: new Date(),
+        summary: electricity.summary
       };
 
       // Broadcast an update event.
