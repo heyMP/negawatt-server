@@ -1,10 +1,8 @@
 angular.module('negawattClientApp')
-  .filter('toPieChartDataset', function (Chart, ChartOptions, moment) {
-    var chartFrequencyActive;
+  .filter('toPieChartDataset', function (Chart, ChartOptions) {
 
     /**
-     * From a collection object create a Google Chart data ser object
-     * according the type.
+     * From a collection object create a Google Chart data for a Pie object
      *
      * @param collection
      *  The collection to format.
@@ -13,10 +11,9 @@ angular.module('negawattClientApp')
      *  The dataset collection filtered.
      */
     return function (collection){
-      chartFrequencyActive = Chart.getActiveFrequency();
       // Recreate collection object.
       collection = {
-        type: chartFrequencyActive.chart_type,
+        type: 'PieChart';,
         data: getDataset(collection),
         options: getOptions(chartFrequencyActive)
       }
@@ -32,15 +29,7 @@ angular.module('negawattClientApp')
      *  Chart options object.
      */
     function getOptions(chartFrequencyActive) {
-      return angular.extend(ChartOptions[chartFrequencyActive.chart_type],
-        {
-          vAxis: {
-            title: chartFrequencyActive.axis_v_title,
-          },
-          hAxis: {
-            title: chartFrequencyActive.axis_h_title
-          }
-        });
+      return {};
     }
 
     /**
@@ -51,97 +40,46 @@ angular.module('negawattClientApp')
      */
     function getDataset(collection) {
       var dataset = {
-        // Add columns.
-        cols: [
-          {
-            'id': 'month',
-            'label': 'Month',
-            'type': 'string',
-          },
-          {
-            'id': 'flat',
-            'label': 'אחיד',
-            'type': 'number',
-          },
-          {
-            'id': 'peak',
-            'label': 'פסגה',
-            'type': 'number',
-          },
-          {
-            'id': 'mid',
-            'label': 'גבע',
-            'type': 'number',
-          },
-          {
-            'id': 'low',
-            'label': 'שפל',
-            'type': 'number',
-          }
+        'cols': [
+          {id: 't', label: 'Categories', type: 'string'},
+          {id: 's', label: 'Slices', type: 'number'}
         ],
-        // Add rows.
-        rows: getRows(collection, 'single')
+        'rows': getRows(collection.values, collection.type)
       };
 
       return dataset;
     };
 
     /**
-     * Return the collection data in the type of the two chart type indicated.
+     * Return the collection in dataset Pie chart google format. According to
+     * the type.
      *
-     * @param collection
+     * @param obj
      *  The collection to filter.
      * @param type
-     *  The type of the rows will request.
+     *  The type of the data (category|meter).
      *
      * @returns {Array}
      *  An array of the data ordering as the type requested.
      */
-    function getRows(collection, type) {
-      var values = {};
+    function getRows(obj, type) {
       var rows = [];
-      var prevRateType;
-      var isLineChart;
+
+      switch (type) {
+        case 'category':
 
 
-      if (type === 'single') {
-        // Prepare data for a single graph
-        // ----------------------------------
-
-        // Create a temp array like { time: {low: 1, mid:4, peak:5}, time: {..}, ..}.
-        isLineChart = chartFrequencyActive.chart_type === 'LineChart';
-
-        angular.forEach(collection, function(item) {
-          if (!(item.timestamp in values)) {
-            // Never encountered this timestamp, create an empty object
-            values[item.timestamp] = {};
-          }
-          // Save the kWhs.
-          values[item.timestamp][item.rate_type] = +item.kwh;
-
-          // Handle problem with line chart:
-          // If having TOUse data, the lines should be elongated one data point forward
-          // when changing rate-type in order to 'connect' the lines of the different
-          // charts.
-          if (isLineChart && prevRateType && prevRateType != item.rate_type) {
-            values[item.timestamp][prevRateType] = +item.kwh;
-          }
-
-          prevRateType = item.rate_type;
-        });
-
-        // Build rows
-        angular.forEach(values, function(item, timestamp) {
-          var label = moment.unix(timestamp).format(chartFrequencyActive.axis_h_format);
-          var col = [
-            { 'v': label },
-            { 'v': item.flat },
-            { 'v': item.peak },
-            { 'v': item.mid  },
-            { 'v': item.low  }
-          ];
-          rows.push({ 'c': col });
-        });
+          // Transform to Google Pie Chart compatible.
+          angular.forEach(obj, function(value, key) {
+            this.push({
+              c: [
+                {v: 'row.label'},
+                {v: value},
+                {id: key}
+              ]
+            });
+          }, rows);
+          break;
       }
 
       return rows;
