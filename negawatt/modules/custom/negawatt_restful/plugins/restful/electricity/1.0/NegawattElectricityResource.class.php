@@ -427,11 +427,6 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
 
     $query = parent::getQuery();
 
-    if (!empty($request['nodata']) && $request['nodata']) {
-      // Add a condition that will omit all data from output, leaving only summary.
-      $query->condition('timestamp', 0);
-    }
-
     // Add a query for meter_category and meter_account.
     $this->addQueryForCategoryAndAccount($query);
 
@@ -456,6 +451,24 @@ class NegawattElectricityResource extends \RestfulDataProviderDbQuery implements
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getQueryForList() {
+    // Handle 'nodata' parameter.
+    $query = parent::getQueryForList();
+
+    $request = $this->getRequest();
+    if (!empty($request['nodata'])) {
+      // 'nodata' parameter in the request means to omit all data from output,
+      // leaving only summary. Since there's no electricity data with timestamp=0,
+      // adding the condition below will remove all data from the response.
+      $query->condition('timestamp', 0);
+    }
+
+    return $query;
+  }
+
+    /**
    * Override RestfulBase::parseRequestForListFilter.
    *
    * Modify the filter for meter-category to catch all the electricity
