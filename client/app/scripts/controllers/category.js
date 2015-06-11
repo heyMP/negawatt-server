@@ -8,7 +8,7 @@
  * Controller of the negawattClientApp
  */
 angular.module('negawattClientApp')
-  .controller('CategoryCtrl', function ($scope, $state, $stateParams, $filter, Category, Meter, FilterFactory, categories, meters, categoriesChart) {
+  .controller('CategoryCtrl', function ($scope, $state, $stateParams, $filter, Category, Meter, FilterFactory, categories, meters) {
 
     // Define property in the parent scope, permit to be accesable
     // by scope methods of the controller.
@@ -19,8 +19,6 @@ angular.module('negawattClientApp')
 
     // Activate filter of meters only if we are in the principal state.
     $scope.filterMeters = FilterFactory.showCategoryFilters();
-
-    console.log(categoriesChart);
 
      /**
      * Determine if a category has meters.

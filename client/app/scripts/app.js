@@ -126,9 +126,10 @@ angular
           'details@dashboard': {
             templateUrl: 'views/dashboard/main.details.html',
             resolve: {
-              categoriesChart: function(ChartCategories, account, categories, $stateParams) {
-                return ChartCategories.get(account.id, $stateParams.categoryId, categories.collection);
+              categoriesChart: function(ChartCategories, FilterFactory, Electricity, account, $stateParams) {
+                return ChartCategories.get(account.id, $stateParams.categoryId, {});
               }
+              //categoryChart: angular.noop
             },
             controller: 'DetailsCtrl'
           },
