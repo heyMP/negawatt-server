@@ -31,11 +31,7 @@ angular.module('negawattClientApp')
     function getOptions(type) {
       return {
         title: 'Kws per ' + type,
-        pieSliceText: 'label',
-        tooltip: {
-          textStyle: {color: '#FF0000'},
-          showColorCode: true
-        }
+        pieSliceText: 'label'
       };
     }
 
