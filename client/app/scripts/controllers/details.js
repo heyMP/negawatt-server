@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('negawattClientApp')
-  .controller('DetailsCtrl', function ($scope, $state, $stateParams, FilterFactory, ChartCategories, categoriesChart, meters) {
+  .controller('DetailsCtrl', function ($scope, $state, $stateParams, FilterFactory, ChartCategories, categoriesChart, meters, $filter) {
     var categoryId;
     // The initialization in a empty object is need it to avoid an error in the initial rendering.
     $scope.categoriesChart = categoriesChart;
@@ -17,22 +17,14 @@ angular.module('negawattClientApp')
     // Handle lazy-load of electricity data.
     // When cache expands, update the chart.
     $scope.$on("nwElectricityChanged", function(event, electricity) {
-      var electricity = electricity[FilterFactory.get('activeElectricityHash')];
+      var summary = $filter('summary')(electricity[FilterFactory.get('activeElectricityHash')]);
 
-      if (angular.isUndefined(electricity)) {
+      if (angular.isUndefined(summary)) {
         return;
       }
       // Update electricity object.
-      // vm.electricity = angular.isDefined(electricity) && electricity;
-      ChartCategories.get($stateParams.accountId, $stateParams.categoryId, electricity)
-        .then(function(dataset) {
-          $scope.categoriesChart = dataset;
-          debugger
-        }, function(error) {
-          debugger;
-          console.log(error);
-        });
-
+      debugger;
+      $scope.categoriesChart = $filter('toPieChartDataset')(summary);
 
       event.preventDefault();
     });
