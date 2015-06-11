@@ -1,10 +1,13 @@
 'use strict';
 
 angular.module('negawattClientApp')
-  .controller('DetailsCtrl', function ($scope, $state, $stateParams, FilterFactory, ChartCategories, categoriesChart, meters, $filter) {
+  .controller('DetailsCtrl', function ($scope, $state, $stateParams, FilterFactory, ChartCategories, meters, $filter, categories) {
     var categoryId;
+
+    $scope.categories = categories;
     // The initialization in a empty object is need it to avoid an error in the initial rendering.
-    $scope.categoriesChart = categoriesChart;
+    //$scope.categoriesChart = categoriesChart;
+    $scope.categoriesChart = {};
 
     // Select category form the pie chart.
     $scope.onSelect = function(selectedItem, chartData) {
@@ -23,8 +26,7 @@ angular.module('negawattClientApp')
         return;
       }
       // Update electricity object.
-      debugger;
-      $scope.categoriesChart = $filter('toPieChartDataset')(summary);
+      $scope.categoriesChart = $filter('toPieChartDataset')(summary, (summary.type === 'category') ? $scope.categories.collection : {});
 
       event.preventDefault();
     });

@@ -1,24 +1,23 @@
 angular.module('negawattClientApp')
-  .filter('toPieChartDataset', function (Utils, Chart, ChartOptions) {
+  .filter('toPieChartDataset', function (Utils, $filter) {
 
     /**
      * From a collection object create a Google Chart data for a Pie object
      *
-     * @param collections
-     *  The collections to get data, label and generate the dataset.
+     * @param collection
+     *  Object where get the data to generate the chart data
+     * @param labels
+     *  Object to get the labels, could be meters or category data.
      *
      * @returns {*}
      *  The dataset collection filtered.
      */
-    return function (collections){
-      var data = angular.isArray(collections[0]) || collections;
-      var labels = angular.isArray(collections[1]) || {};
-
+    return function (collection, labels){
       // Recreate collection object.
       collection = {
         type: 'PieChart',
-        data: getDataset(data, labels),
-        options: getOptions()
+        data: getDataset(collection, labels),
+        options: getOptions(collection.type)
       }
       return collection;
     }
@@ -29,15 +28,25 @@ angular.module('negawattClientApp')
      * @returns {*}
      *  Chart options object.
      */
-    function getOptions() {
-      return {};
+    function getOptions(type) {
+      return {
+        title: 'Kws per ' + type,
+        pieSliceText: 'label',
+        tooltip: {
+          textStyle: {color: '#FF0000'},
+          showColorCode: true
+        }
+      };
     }
 
     /**
      * Return the object with the dataset based on the collection object.
      *
      * @param collection
-     *  The collection to format.
+     *  The collection data.
+     * @param labels
+     *  The object with the labels.
+     *
      */
     function getDataset(collection, labels) {
       var dataset = {
@@ -63,7 +72,7 @@ angular.module('negawattClientApp')
      * @returns {Array}
      *  An array of the data ordering as the type requested.
      */
-    function getRows(obj, type) {
+    function getRows(obj, type, labels) {
       var rows = [];
 
       switch (type) {
@@ -74,7 +83,7 @@ angular.module('negawattClientApp')
           angular.forEach(obj, function(value, key) {
             this.push({
               c: [
-                {v: !Utils.isEmpty(labels) && labels[key].title || 'label' + key},
+                {v: !Utils.isEmpty(labels) && labels[key].label || 'label' + key},
                 {v: value},
                 {id: key}
               ]
