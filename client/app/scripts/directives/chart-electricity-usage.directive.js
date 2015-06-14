@@ -7,6 +7,8 @@ angular.module('negawattDirectives', [])
       templateUrl: 'scripts/directives/chart-electricity-usage.directive.html',
       controller: function chartElectricityUsageCtrl(Utils, ChartUsagePeriod, FilterFactory, Electricity, $state, $stateParams, $timeout, $urlRouter, $location, $filter, $scope) {
         var ctrlChart = this;
+        var loading;
+        ctrlChart.state;
 
         // Update the Chart data every time the electricity data.
         $scope.$watch('ctrlChart.electricity', function(current) {
@@ -31,14 +33,16 @@ angular.module('negawattDirectives', [])
               updateElectricityFilters({chartFreq: period.chart && +period.chart.type, chartNextPeriod: period.next, chartPreviousPeriod: period.previous});
               refreshChart();
             }
+            else {
+              setState('empty');
+            }
           }
           else {
             // Render the chart with the active selected data.
             render();
-
           }
           // Clear the spinner.
-          ctrlChart.isLoading = false;
+          loading = false;
 
         }, true);
 
@@ -47,6 +51,9 @@ angular.module('negawattDirectives', [])
         ctrlChart.frequencies = ChartUsagePeriod.getFrequencies();
         // Check if next/previous period have data.
         ctrlChart.showNavigation = ChartUsagePeriod.hasPeriod;
+
+        ctrlChart.__period = ChartUsagePeriod.getPeriod();
+        ctrlChart.__chartUsagePeriod = ChartUsagePeriod;
 
         /**
          * Change frequency of the chart.
@@ -100,6 +107,10 @@ angular.module('negawattDirectives', [])
           ctrlChart.hasData && refreshChart();
         }
 
+        ctrlChart.isLoading = function() {
+          return !!loading;
+        }
+
         /**
          * Return true if we have data to show the request chart on the period
          * parameter, otherwise false.
@@ -139,7 +150,7 @@ angular.module('negawattDirectives', [])
          * electricity. Generally update data deom
          */
         function refreshChart() {
-          ctrlChart.isLoading = true;
+          loading = true;
           // Update with the actual data.
 
           // Refresh electricity data.
@@ -160,8 +171,10 @@ angular.module('negawattDirectives', [])
             ctrlChart.data = $filter('toChartDataset')($filter('activeElectricityFilters')(ctrlChart.electricity));
           }
           else {
-
-            if (electricity.noData) {
+            if (electricity.limits.max === null && electricity.limits.min === null) {
+              setState('empty');
+            }
+            else if (electricity.noData) {
               // Get cache data.
               ChartUsagePeriod.setActiveFrequency($stateParams.chartFreq);
               ChartUsagePeriod.config(electricity.limits);
@@ -176,6 +189,15 @@ angular.module('negawattDirectives', [])
               // Load cache data
               ctrlChart.data = $filter('toChartDataset')(electricity.data);
             }
+          }
+
+          /**
+           * Set User interface state.
+           *
+           * @param state
+           */
+          function setState(state) {
+            ctrlChart.state = 'empty';
           }
 
 
