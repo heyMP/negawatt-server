@@ -135,7 +135,7 @@ angular.module('negawattClientApp')
         data: (cache[key] ? cache[key].data : []).concat(electricity.data),
         limits: electricity.summary.timestamp,        
         timestamp: new Date(),
-        noData: noData
+        noData: noData,
         summary: electricity.summary
       };
 
