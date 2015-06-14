@@ -132,7 +132,7 @@ function negawatt_meter_node_presave($node) {
     $provider = &drupal_static(__FUNCTION__ . '_provider', NULL);
     $geocoder = &drupal_static(__FUNCTION__ . '_geocoder', NULL);
     $adapter = $adapter ? $adapter : new \Geocoder\HttpAdapter\CurlHttpAdapter();
-    $provider = $provider ? $provider : new \Geocoder\Provider\GoogleMapsProvider($adapter, null, null, false, $googlemaps_api_key);
+    $provider = $provider ? $provider : new \Geocoder\Provider\GoogleMapsProvider($adapter, NULL, NULL, FALSE, $googlemaps_api_key);
     $geocoder = $geocoder ? $geocoder : new \Geocoder\Geocoder($provider);
 
     // Look for geocode.
