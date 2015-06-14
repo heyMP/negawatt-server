@@ -104,11 +104,11 @@ angular.module('negawattClientApp')
           outOfRange = true;
         }
 
-        if (period.next && period.next > this.max || period.previous && period.previous > this.max ) {
+        if (period.previous && period.previous > this.max) {
           outOfRange = true;
         }
 
-        if (period.next && period.next < this.min || period.previous && period.previous < this.min ) {
+        if (period.next && period.next < this.min) {
           outOfRange = true;
         }
 

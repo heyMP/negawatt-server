@@ -28,7 +28,7 @@ angular.module('negawattDirectives', [])
           if (FilterFactory.get('electricity-nodata')) {
             // Update parameters an refreshChart.
             if (period) {
-              updateElectricityFilters({chartFreq: period.chart && +period.chart.type, chartNextPeriod: period.next, chartPreviousPeriod: period.previous}, true);
+              updateElectricityFilters({chartFreq: period.chart && +period.chart.type, chartNextPeriod: period.next, chartPreviousPeriod: period.previous});
               refreshChart();
             }
           }
