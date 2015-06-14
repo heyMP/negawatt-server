@@ -101,13 +101,15 @@ angular.module('negawattClientApp')
         url: url,
         params: params
       }).success(function(electricity, status, headers, config) {
-        setCache(electricity, hash, skipResetCache, angular.isDefined(config.params.nodata));
+        var noData = angular.isDefined(config.params.nodata);
+        var hasNextPage = electricity.next != undefined;
+
+        setCache(electricity, hash, skipResetCache, noData);
 
         deferred.resolve(electricityRecords(hash));
 
         // If there are more pages, read them.
-        var hasNextPage = electricity.next != undefined;
-        if (hasNextPage) {
+        if (hasNextPage && !noData) {
           getDataFromBackend(hash, pageNumber + 1, true);
         }
       });
